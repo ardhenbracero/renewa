@@ -18,6 +18,7 @@ export interface Subscription {
   nextRenewalDate: string; // ISO date string
   status: SubscriptionStatus;
   createdAt: string;
+  iconSlug: string | null;
 }
 
 // Shape used when creating a new subscription (no id/createdAt yet)

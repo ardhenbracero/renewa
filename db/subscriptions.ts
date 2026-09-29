@@ -13,8 +13,8 @@ function rowToSubscription(row: any): Subscription {
 export function addSubscription(sub: NewSubscription): number {
   const result = db.runSync(
     `INSERT INTO subscriptions
-      (name, amount, currency, billingCycle, customIntervalDays, category, notes, isTrial, trialConvertsAt, autoPay, startDate, nextRenewalDate, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (name, amount, currency, billingCycle, customIntervalDays, category, notes, isTrial, trialConvertsAt, autoPay, startDate, nextRenewalDate, status, iconSlug)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       sub.name,
       sub.amount,
@@ -29,6 +29,7 @@ export function addSubscription(sub: NewSubscription): number {
       sub.startDate,
       sub.nextRenewalDate,
       sub.status,
+      sub.iconSlug,
     ],
   );
   return result.lastInsertRowId;
@@ -49,10 +50,7 @@ export function getActiveSubscriptions(): Subscription[] {
 }
 
 export function getSubscriptionById(id: number): Subscription | null {
-  const row = db.getFirstSync(
-    "SELECT * FROM subscriptions WHERE id = ?",
-    [id],
-  );
+  const row = db.getFirstSync("SELECT * FROM subscriptions WHERE id = ?", [id]);
   return row ? rowToSubscription(row) : null;
 }
 

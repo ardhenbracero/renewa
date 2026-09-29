@@ -10,8 +10,11 @@ import {
   View,
 } from "react-native";
 
+import { BrandIconPickerModal } from "@/components/BrandIconPickerModal";
+import { ServiceIcon } from "@/components/service-icon";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { SERVICE_PRESETS } from "@/constants/service-presets";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { BillingCycle, NewSubscription } from "@db/schema";
@@ -53,10 +56,11 @@ export default function AddSubscriptionScreen() {
   const theme = useTheme();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditing = !!id;
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
-  const [currency, setCurrency] = useState("USD");
+  const [currency, setCurrency] = useState("PHP");
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
   const [customIntervalDays, setCustomIntervalDays] = useState("30");
@@ -64,6 +68,9 @@ export default function AddSubscriptionScreen() {
   const [isTrial, setIsTrial] = useState(false);
   const [autoPay, setAutoPay] = useState(true);
   const [notes, setNotes] = useState("");
+  const [iconSlug, setIconSlug] = useState<string | null>(null);
+  const QUICK_PICK_LIMIT = 8;
+  const [pickerVisible, setPickerVisible] = useState(false);
 
   useEffect(() => {
     if (isEditing) {
@@ -79,6 +86,7 @@ export default function AddSubscriptionScreen() {
         setIsTrial(existing.isTrial);
         setAutoPay(existing.autoPay);
         setNotes(existing.notes ?? "");
+        setIconSlug(existing.iconSlug ?? null);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -119,6 +127,7 @@ export default function AddSubscriptionScreen() {
       startDate: isEditing ? nextRenewalDate : todayIso(),
       nextRenewalDate,
       status: "active",
+      iconSlug,
     };
 
     if (isEditing) {
@@ -147,6 +156,59 @@ export default function AddSubscriptionScreen() {
   return (
     <ThemedView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
+        <Field label="Quick pick">
+          <View style={styles.chipRow}>
+            {SERVICE_PRESETS.slice(0, QUICK_PICK_LIMIT).map((preset) => (
+              <Pressable
+                key={preset.slug}
+                style={[
+                  styles.serviceChip,
+                  selectedPreset === preset.slug && styles.serviceChipSelected,
+                ]}
+                onPress={() => {
+                  setSelectedPreset(preset.slug);
+                  setName(preset.name);
+                  setCategory(preset.category);
+                  setIconSlug(preset.slug);
+                }}
+              >
+                <ServiceIcon
+                  name={preset.name}
+                  iconSlug={preset.slug}
+                  size={20}
+                />
+                <ThemedText
+                  type="small"
+                  style={
+                    selectedPreset === preset.slug
+                      ? styles.serviceChipTextSelected
+                      : undefined
+                  }
+                >
+                  {preset.name}
+                </ThemedText>
+              </Pressable>
+            ))}
+
+            <Pressable
+              style={styles.serviceChip}
+              onPress={() => setPickerVisible(true)}
+            >
+              <ThemedText type="small">See more →</ThemedText>
+            </Pressable>
+          </View>
+        </Field>
+
+        <BrandIconPickerModal
+          visible={pickerVisible}
+          onClose={() => setPickerVisible(false)}
+          onSelect={(entry) => {
+            setSelectedPreset(entry.slug);
+            setName(entry.title);
+            setIconSlug(entry.slug);
+          }}
+        />
+
         <Field label="Name">
           <TextInput
             style={[styles.input, { color: theme.text }]}
@@ -161,7 +223,7 @@ export default function AddSubscriptionScreen() {
           <Field label="Amount" style={styles.flex2}>
             <TextInput
               style={[styles.input, { color: theme.text }]}
-              placeholder="9.99"
+              placeholder="199"
               placeholderTextColor={theme.textSecondary}
               keyboardType="decimal-pad"
               value={amount}
@@ -344,6 +406,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  serviceChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.one,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "#8884",
+  },
+  serviceChipSelected: {
+    backgroundColor: "#4F46E5",
+    borderColor: "#4F46E5",
+  },
+  serviceChipTextSelected: {
+    color: "#ffffff",
   },
   saveButton: {
     backgroundColor: "#4F46E5",

@@ -1,48 +1,32 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
-const PALETTE = [
-  "#E5484D",
-  "#30A46C",
-  "#3B82F6",
-  "#F59E0B",
-  "#8B5CF6",
-  "#EC4899",
-  "#14B8A6",
-];
-
-export function colorForName(name: string): string {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return PALETTE[Math.abs(hash) % PALETTE.length];
-}
+import { BrandIcon, hasBrandIcon } from "@/components/brand-icon";
+import { InitialsAvatar } from "@/components/InitialsAvatar";
 
 export function ServiceIcon({
   name,
+  iconSlug,
   size = 40,
 }: {
   name: string;
+  iconSlug?: string | null;
   size?: number;
 }) {
-  const initial = name.trim().charAt(0).toUpperCase() || "?";
-  const bg = colorForName(name);
+  if (iconSlug && hasBrandIcon(iconSlug)) {
+    return (
+      <View
+        style={[
+          styles.circle,
+          styles.brandCircle,
+          { width: size, height: size, borderRadius: size / 2 },
+        ]}
+      >
+        <BrandIcon slug={iconSlug} size={size * 0.55} />
+      </View>
+    );
+  }
 
-  return (
-    <View
-      style={[
-        styles.circle,
-        {
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor: bg,
-        },
-      ]}
-    >
-      <Text style={[styles.letter, { fontSize: size * 0.42 }]}>{initial}</Text>
-    </View>
-  );
+  return <InitialsAvatar name={name} size={size} />;
 }
 
 const styles = StyleSheet.create({
@@ -50,8 +34,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  letter: {
-    color: "#ffffff",
-    fontWeight: "700",
+  brandCircle: {
+    backgroundColor: "#F0F0F3",
   },
 });

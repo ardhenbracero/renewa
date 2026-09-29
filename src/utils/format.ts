@@ -1,6 +1,6 @@
 export function formatCurrency(
   amount: number,
-  currency: string = "USD",
+  currency: string = "PHP",
 ): string {
   try {
     return new Intl.NumberFormat("en-US", {

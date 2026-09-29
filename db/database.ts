@@ -22,6 +22,18 @@ export function initDatabase() {
       createdAt TEXT NOT NULL DEFAULT (datetime('now'))
     );
   `);
+
+  migrateAddIconSlugColumn();
+}
+
+function migrateAddIconSlugColumn() {
+  const columns = db.getAllSync<{ name: string }>(
+    "PRAGMA table_info(subscriptions);",
+  );
+  const hasIconSlug = columns.some((col) => col.name === "iconSlug");
+  if (!hasIconSlug) {
+    db.execSync("ALTER TABLE subscriptions ADD COLUMN iconSlug TEXT;");
+  }
 }
 
 export default db;

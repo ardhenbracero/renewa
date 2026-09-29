@@ -1,18 +1,17 @@
+import { BottomTabBar } from "@/components/bottom-tab-bar";
+import { SubscriptionRow } from "@/components/subscription-row";
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { Colors, Spacing } from "@/constants/theme";
+import { daysUntil, useSubscriptions } from "@/hooks/use-subscriptions";
 import { useTheme } from "@/hooks/use-theme";
+import { formatCurrency } from "@/utils/format";
+import { getUpcomingRenewalDate } from "@db/dateLogic";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import { BottomTabBar } from "@/components/bottom-tab-bar";
-import { SubscriptionRow } from "@/components/subscription-row";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { Spacing } from "@/constants/theme";
-import { daysUntil, useSubscriptions } from "@/hooks/use-subscriptions";
-import { formatCurrency } from "@/utils/format";
-import { getUpcomingRenewalDate } from "@db/dateLogic";
 
 export default function VaultScreen() {
   const router = useRouter();
@@ -20,6 +19,7 @@ export default function VaultScreen() {
     useSubscriptions();
 
   const theme = useTheme();
+  const activeCount = subscriptions.filter((s) => s.status === "active").length;
 
   useFocusEffect(
     useCallback(() => {
@@ -50,27 +50,28 @@ export default function VaultScreen() {
                 style={styles.summaryCard}
               >
                 <View style={styles.activeSub}>
-                  <ThemedText type="small" themeColor="textSecondary">
+                  <ThemedText type="small" themeColor="onAccent">
                     MONTHLY RECURRING
                   </ThemedText>
-                  <ThemedText
-                    type="smallBold"
-                    style={styles.activeSubscription}
-                  >
-                    {" "}
-                    active{" "}
-                  </ThemedText>
+                  <View style={styles.activeSubRow}>
+                    <ThemedText
+                      type="smallBold"
+                      style={styles.activeSubscription}
+                    >
+                      <View style={styles.activeDot} /> {activeCount} active
+                    </ThemedText>
+                  </View>
                 </View>
                 <ThemedText type="title" style={styles.totalText}>
                   {formatCurrency(monthlyTotal)}{" "}
-                  <ThemedText themeColor="textSecondary">/ month</ThemedText>
+                  <ThemedText themeColor="onAccent">/ month</ThemedText>
                 </ThemedText>
                 <View style={styles.divider} />
                 <View style={styles.yearlyRow}>
-                  <ThemedText type="small" themeColor="textSecondary">
+                  <ThemedText type="small" themeColor="onAccent">
                     Estimated yearly outlay
                   </ThemedText>
-                  <ThemedText type="smallBold">
+                  <ThemedText type="smallBold" themeColor="onAccent">
                     {formatCurrency(yearlyTotal)}
                   </ThemedText>
                 </View>
@@ -151,16 +152,34 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
     marginBottom: Spacing.four,
   },
-  totalText: { fontSize: 36, lineHeight: 40, fontWeight: 800 },
+  totalText: {
+    fontSize: 36,
+    lineHeight: 40,
+    fontWeight: 800,
+    color: Colors.light.onAccent,
+  },
   divider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: "#8888",
     marginVertical: Spacing.two,
   },
+  activeSubRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  activeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#22C55E",
+  },
   activeSubscription: {
     backgroundColor: "#ffffff4e",
     borderRadius: 20,
     padding: Spacing.one,
+    paddingHorizontal: 10,
+    color: Colors.light.onAccent,
   },
   activeSub: {
     flexDirection: "row",

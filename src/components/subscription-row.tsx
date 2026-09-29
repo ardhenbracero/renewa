@@ -26,7 +26,7 @@ export function SubscriptionRow({
         })
       }
     >
-      <ServiceIcon name={subscription.name} />
+      <ServiceIcon name={subscription.name} iconSlug={subscription.iconSlug} />
       <View style={styles.meta}>
         <ThemedText type="default" numberOfLines={1}>
           {subscription.name}
@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
   },
   pricing: {
     alignItems: "flex-end",
+    flexDirection: "row",
     gap: 2,
   },
 });
