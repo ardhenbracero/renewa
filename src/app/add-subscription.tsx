@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Switch,
   TextInput,
-  View,
+  View
 } from "react-native";
 
 import { BrandIconPickerModal } from "@/components/BrandIconPickerModal";
@@ -24,6 +24,7 @@ import {
   getSubscriptionById,
   updateSubscription,
 } from "@db/subscriptions";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const CYCLES: { value: BillingCycle; label: string }[] = [
   { value: "weekly", label: "Weekly" },
@@ -71,6 +72,7 @@ export default function AddSubscriptionScreen() {
   const [iconSlug, setIconSlug] = useState<string | null>(null);
   const QUICK_PICK_LIMIT = 8;
   const [pickerVisible, setPickerVisible] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     if (isEditing) {
@@ -137,6 +139,18 @@ export default function AddSubscriptionScreen() {
     }
 
     router.back();
+  }
+
+  function parseIsoDate(iso: string): Date {
+    const [year, month, day] = iso.split("-").map(Number);
+    return new Date(year, (month || 1) - 1, day || 1);
+  }
+
+  function toIsoDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   }
 
   function handleDelete() {
@@ -281,13 +295,35 @@ export default function AddSubscriptionScreen() {
         )}
 
         <Field label="Next renewal date">
-          <TextInput
-            style={[styles.input, { color: theme.text }]}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={theme.textSecondary}
-            value={nextRenewalDate}
-            onChangeText={setNextRenewalDate}
-          />
+          <Pressable
+            style={[styles.input, { justifyContent: "center" }]}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <ThemedText
+              style={{
+                color: nextRenewalDate ? theme.text : theme.textSecondary,
+              }}
+            >
+              {nextRenewalDate || "Select a date"}
+            </ThemedText>
+          </Pressable>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={
+                nextRenewalDate ? parseIsoDate(nextRenewalDate) : new Date()
+              }
+              mode="date"
+              display="default"
+              themeVariant="dark"
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false);
+                if (selectedDate) {
+                  setNextRenewalDate(toIsoDate(selectedDate));
+                }
+              }}
+            />
+          )}
         </Field>
 
         <Field label="Category">
