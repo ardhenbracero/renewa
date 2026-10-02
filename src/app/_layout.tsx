@@ -27,8 +27,8 @@ export default function RootLayout() {
         name="add-subscription"
         options={{
           presentation: "modal",
-          headerShown: true,
-          title: "Add Subscription",
+          headerShown: false,
+          title: "Add Subscriptionnn",
         }}
       />
     </Stack>

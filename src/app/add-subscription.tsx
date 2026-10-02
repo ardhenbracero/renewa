@@ -7,14 +7,17 @@ import {
   StyleSheet,
   Switch,
   TextInput,
-  View
+  View,
 } from "react-native";
 
+import { AddSubscriptionHeader } from "@/components/AddSubscriptionHeader";
+import { AmountCurrencyCard } from "@/components/AmountCurrencyCard";
 import { BrandIconPickerModal } from "@/components/BrandIconPickerModal";
-import { ServiceIcon } from "@/components/service-icon";
+import { DetailsCard, DetailsSection } from "@/components/DetailsCard";
+import { QuickPickSection } from "@/components/QuickPickSection";
+import { ServicePlanNameSection } from "@/components/ServicePlanNameSection";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { SERVICE_PRESETS } from "@/constants/service-presets";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { BillingCycle, NewSubscription } from "@db/schema";
@@ -170,48 +173,18 @@ export default function AddSubscriptionScreen() {
   return (
     <ThemedView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Field label="Quick pick">
-          <View style={styles.chipRow}>
-            {SERVICE_PRESETS.slice(0, QUICK_PICK_LIMIT).map((preset) => (
-              <Pressable
-                key={preset.slug}
-                style={[
-                  styles.serviceChip,
-                  selectedPreset === preset.slug && styles.serviceChipSelected,
-                ]}
-                onPress={() => {
-                  setSelectedPreset(preset.slug);
-                  setName(preset.name);
-                  setCategory(preset.category);
-                  setIconSlug(preset.slug);
-                }}
-              >
-                <ServiceIcon
-                  name={preset.name}
-                  iconSlug={preset.slug}
-                  size={20}
-                />
-                <ThemedText
-                  type="small"
-                  style={
-                    selectedPreset === preset.slug
-                      ? styles.serviceChipTextSelected
-                      : undefined
-                  }
-                >
-                  {preset.name}
-                </ThemedText>
-              </Pressable>
-            ))}
+        <AddSubscriptionHeader onClose={() => router.back()} />
 
-            <Pressable
-              style={styles.serviceChip}
-              onPress={() => setPickerVisible(true)}
-            >
-              <ThemedText type="small">See more →</ThemedText>
-            </Pressable>
-          </View>
-        </Field>
+        <QuickPickSection
+          selectedSlug={selectedPreset}
+          onSelect={(slug, name, category) => {
+            setSelectedPreset(slug);
+            setIconSlug(slug);
+            setName(name);
+            setCategory(category);
+          }}
+          onSeeMore={() => setPickerVisible(true)}
+        />
 
         <BrandIconPickerModal
           visible={pickerVisible}
@@ -220,10 +193,30 @@ export default function AddSubscriptionScreen() {
             setSelectedPreset(entry.slug);
             setName(entry.title);
             setIconSlug(entry.slug);
+            setCategory(entry.category);
           }}
         />
 
-        <Field label="Name">
+        <AmountCurrencyCard
+          amount={amount}
+          onChangeAmount={setAmount}
+          currencyCode={currency}
+          onChangeCurrency={setCurrency}
+          autoPay={autoPay}
+        />
+
+        <DetailsCard>
+          <DetailsSection>
+            <ServicePlanNameSection
+              name={name}
+              onChangeName={setName}
+              iconSlug={iconSlug}
+            />
+          </DetailsSection>
+
+          {/* Billing Frequency, Next Renewal Date, Category sections go here next */}
+        </DetailsCard>
+        {/* <Field label="Name">
           <TextInput
             style={[styles.input, { color: theme.text }]}
             placeholder="Netflix"
@@ -231,31 +224,7 @@ export default function AddSubscriptionScreen() {
             value={name}
             onChangeText={setName}
           />
-        </Field>
-
-        <View style={styles.row}>
-          <Field label="Amount" style={styles.flex2}>
-            <TextInput
-              style={[styles.input, { color: theme.text }]}
-              placeholder="199"
-              placeholderTextColor={theme.textSecondary}
-              keyboardType="decimal-pad"
-              value={amount}
-              onChangeText={setAmount}
-            />
-          </Field>
-          <Field label="Currency" style={styles.flex1}>
-            <TextInput
-              style={[styles.input, { color: theme.text }]}
-              placeholder="USD"
-              placeholderTextColor={theme.textSecondary}
-              autoCapitalize="characters"
-              maxLength={3}
-              value={currency}
-              onChangeText={setCurrency}
-            />
-          </Field>
-        </View>
+        </Field> */}
 
         <Field label="Billing cycle">
           <View style={styles.chipRow}>
@@ -408,7 +377,10 @@ function Field({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {
+    flex: 1,
+    backgroundColor: "#FBF9F6",
+  },
   content: {
     padding: Spacing.three,
     gap: Spacing.three,
@@ -473,4 +445,30 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
   },
   deleteButtonText: { color: "#E5484D" },
+  eyebrow: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.6,
+    color: "#5B21B6",
+    textTransform: "uppercase",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "800",
+    marginTop: 4,
+    color: "#111827",
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginTop: 4,
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#F3F4F6",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
