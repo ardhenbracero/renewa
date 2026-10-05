@@ -19,12 +19,14 @@ export function AmountCurrencyCard({
   currencyCode,
   onChangeCurrency,
   autoPay,
+  isTrial,
 }: {
   amount: string;
   onChangeAmount: (value: string) => void;
   currencyCode: string;
   onChangeCurrency: (code: string) => void;
   autoPay: boolean;
+  isTrial: boolean;
 }) {
   const [pickerVisible, setPickerVisible] = useState(false);
   const selected =
@@ -59,7 +61,24 @@ export function AmountCurrencyCard({
             onChangeText={onChangeAmount}
           />
         </View>
-        {autoPay && (
+
+        {isTrial && autoPay && (
+          <View style={[styles.pill, styles.pillTrial]}>
+            <ThemedText style={[styles.pillText, styles.pillTextTrial]}>
+              Trial - auto renew
+            </ThemedText>
+          </View>
+        )}
+
+        {isTrial && !autoPay && (
+          <View style={[styles.pill, styles.pillTrial]}>
+            <ThemedText style={[styles.pillText, styles.pillTextTrial]}>
+              Free Trial
+            </ThemedText>
+          </View>
+        )}
+
+        {!isTrial && autoPay && (
           <View style={styles.pill}>
             <ThemedText style={styles.pillText}>Auto-Pay active</ThemedText>
           </View>
@@ -168,18 +187,30 @@ const styles = StyleSheet.create({
     padding: 0,
     minWidth: 80,
   },
+  pillRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 12,
+  },
   pill: {
     alignSelf: "flex-start",
     backgroundColor: "#EDE9FE",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 20,
     marginTop: 12,
+  },
+  pillTrial: {
+    backgroundColor: "#DCFCE7", // soft green, distinct from violet auto-pay pill
   },
   pillText: {
     fontSize: 12,
     fontWeight: "600",
     color: ACCENT,
+  },
+  pillTextTrial: {
+    color: "#15803D", // matching green text
   },
   backdrop: {
     flex: 1,

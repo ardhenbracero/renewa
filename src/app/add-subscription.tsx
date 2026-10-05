@@ -2,22 +2,28 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   TextInput,
   View,
 } from "react-native";
 
 import { AddSubscriptionHeader } from "@/components/AddSubscriptionHeader";
 import { AmountCurrencyCard } from "@/components/AmountCurrencyCard";
+import { BillingFrequencySection } from "@/components/BillingFrequencySection";
 import { BrandIconPickerModal } from "@/components/BrandIconPickerModal";
+import { CategorySection } from "@/components/CategorySection";
 import { DetailsCard, DetailsSection } from "@/components/DetailsCard";
+import { NextRenewalDateSection } from "@/components/NextRenewalDateSection";
+import { NotesSection } from "@/components/NotesSection";
 import { QuickPickSection } from "@/components/QuickPickSection";
 import { ServicePlanNameSection } from "@/components/ServicePlanNameSection";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { ToggleRow } from "@/components/ToggleRow";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { BillingCycle, NewSubscription } from "@db/schema";
@@ -27,7 +33,6 @@ import {
   getSubscriptionById,
   updateSubscription,
 } from "@db/subscriptions";
-import DateTimePicker from "@react-native-community/datetimepicker";
 
 const CYCLES: { value: BillingCycle; label: string }[] = [
   { value: "weekly", label: "Weekly" },
@@ -76,6 +81,7 @@ export default function AddSubscriptionScreen() {
   const QUICK_PICK_LIMIT = 8;
   const [pickerVisible, setPickerVisible] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
 
   useEffect(() => {
     if (isEditing) {
@@ -171,185 +177,130 @@ export default function AddSubscriptionScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <AddSubscriptionHeader onClose={() => router.back()} />
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+    >
+      <ThemedView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.content}>
+          <AddSubscriptionHeader onClose={() => router.back()} />
 
-        <QuickPickSection
-          selectedSlug={selectedPreset}
-          onSelect={(slug, name, category) => {
-            setSelectedPreset(slug);
-            setIconSlug(slug);
-            setName(name);
-            setCategory(category);
-          }}
-          onSeeMore={() => setPickerVisible(true)}
-        />
-
-        <BrandIconPickerModal
-          visible={pickerVisible}
-          onClose={() => setPickerVisible(false)}
-          onSelect={(entry) => {
-            setSelectedPreset(entry.slug);
-            setName(entry.title);
-            setIconSlug(entry.slug);
-            setCategory(entry.category);
-          }}
-        />
-
-        <AmountCurrencyCard
-          amount={amount}
-          onChangeAmount={setAmount}
-          currencyCode={currency}
-          onChangeCurrency={setCurrency}
-          autoPay={autoPay}
-        />
-
-        <DetailsCard>
-          <DetailsSection>
-            <ServicePlanNameSection
-              name={name}
-              onChangeName={setName}
-              iconSlug={iconSlug}
-            />
-          </DetailsSection>
-
-          {/* Billing Frequency, Next Renewal Date, Category sections go here next */}
-        </DetailsCard>
-        {/* <Field label="Name">
-          <TextInput
-            style={[styles.input, { color: theme.text }]}
-            placeholder="Netflix"
-            placeholderTextColor={theme.textSecondary}
-            value={name}
-            onChangeText={setName}
+          <QuickPickSection
+            selectedSlug={selectedPreset}
+            onSelect={(slug, name, category) => {
+              setSelectedPreset(slug);
+              setIconSlug(slug);
+              setName(name);
+              setCategory(category);
+            }}
+            onSeeMore={() => setPickerVisible(true)}
           />
-        </Field> */}
 
-        <Field label="Billing cycle">
-          <View style={styles.chipRow}>
-            {CYCLES.map((c) => (
-              <Pressable
-                key={c.value}
-                style={[
-                  styles.chip,
-                  billingCycle === c.value && styles.chipSelected,
-                ]}
-                onPress={() => setBillingCycle(c.value)}
-              >
-                <ThemedText
-                  type="small"
-                  style={
-                    billingCycle === c.value
-                      ? styles.chipTextSelected
-                      : undefined
-                  }
-                >
-                  {c.label}
-                </ThemedText>
-              </Pressable>
-            ))}
-          </View>
-        </Field>
+          <BrandIconPickerModal
+            visible={pickerVisible}
+            onClose={() => setPickerVisible(false)}
+            onSelect={(entry) => {
+              setSelectedPreset(entry.slug);
+              setName(entry.title);
+              setIconSlug(entry.slug);
+              setCategory(entry.category);
+            }}
+          />
 
-        {billingCycle === "custom" && (
-          <Field label="Repeats every (days)">
-            <TextInput
-              style={[styles.input, { color: theme.text }]}
-              keyboardType="number-pad"
-              value={customIntervalDays}
-              onChangeText={setCustomIntervalDays}
-            />
-          </Field>
-        )}
+          <AmountCurrencyCard
+            amount={amount}
+            onChangeAmount={setAmount}
+            currencyCode={currency}
+            onChangeCurrency={setCurrency}
+            autoPay={autoPay}
+            isTrial={isTrial}
+          />
 
-        <Field label="Next renewal date">
-          <Pressable
-            style={[styles.input, { justifyContent: "center" }]}
-            onPress={() => setShowDatePicker(true)}
-          >
-            <ThemedText
-              style={{
-                color: nextRenewalDate ? theme.text : theme.textSecondary,
-              }}
-            >
-              {nextRenewalDate || "Select a date"}
+          <DetailsCard>
+            <DetailsSection>
+              <ServicePlanNameSection
+                name={name}
+                onChangeName={setName}
+                iconSlug={iconSlug}
+              />
+            </DetailsSection>
+
+            <DetailsSection>
+              <BillingFrequencySection
+                value={billingCycle}
+                onChange={setBillingCycle}
+              />
+            </DetailsSection>
+
+            {billingCycle === "custom" && (
+              <DetailsSection>
+                <Field label="Repeats every (days)">
+                  <TextInput
+                    style={[styles.input, { color: theme.text }]}
+                    keyboardType="number-pad"
+                    value={customIntervalDays}
+                    onChangeText={setCustomIntervalDays}
+                  />
+                </Field>
+              </DetailsSection>
+            )}
+
+            <DetailsSection>
+              <NextRenewalDateSection
+                date={nextRenewalDate}
+                onChangeDate={setNextRenewalDate}
+              />
+            </DetailsSection>
+            <DetailsSection>
+              <CategorySection value={category} onChange={setCategory} />
+            </DetailsSection>
+          </DetailsCard>
+
+          <DetailsCard>
+            <DetailsSection>
+              <ToggleRow
+                icon="gift-outline"
+                label="Free trial"
+                subtitle="Mark if this is a trial period"
+                value={isTrial}
+                onValueChange={setIsTrial}
+              />
+            </DetailsSection>
+
+            <DetailsSection>
+              <ToggleRow
+                icon="card-outline"
+                label="Auto-pay"
+                subtitle="Auto charged each cycle"
+                value={autoPay}
+                onValueChange={setAutoPay}
+              />
+            </DetailsSection>
+          </DetailsCard>
+
+          <DetailsCard>
+            <DetailsSection last>
+              <NotesSection value={notes} onChangeText={setNotes} />
+            </DetailsSection>
+          </DetailsCard>
+
+          <Pressable style={styles.saveButton} onPress={handleSave}>
+            <ThemedText type="default" style={styles.saveButtonText}>
+              {isEditing ? "Save changes" : "Add subscription"}
             </ThemedText>
           </Pressable>
 
-          {showDatePicker && (
-            <DateTimePicker
-              value={
-                nextRenewalDate ? parseIsoDate(nextRenewalDate) : new Date()
-              }
-              mode="date"
-              display="default"
-              themeVariant="dark"
-              onChange={(event, selectedDate) => {
-                setShowDatePicker(false);
-                if (selectedDate) {
-                  setNextRenewalDate(toIsoDate(selectedDate));
-                }
-              }}
-            />
+          {isEditing && (
+            <Pressable style={styles.deleteButton} onPress={handleDelete}>
+              <ThemedText type="default" style={styles.deleteButtonText}>
+                Delete subscription
+              </ThemedText>
+            </Pressable>
           )}
-        </Field>
-
-        <Field label="Category">
-          <View style={styles.chipRow}>
-            {CATEGORIES.map((c) => (
-              <Pressable
-                key={c}
-                style={[styles.chip, category === c && styles.chipSelected]}
-                onPress={() => setCategory(c)}
-              >
-                <ThemedText
-                  type="small"
-                  style={category === c ? styles.chipTextSelected : undefined}
-                >
-                  {c}
-                </ThemedText>
-              </Pressable>
-            ))}
-          </View>
-        </Field>
-
-        <View style={styles.switchRow}>
-          <ThemedText type="default">Free trial</ThemedText>
-          <Switch value={isTrial} onValueChange={setIsTrial} />
-        </View>
-
-        <View style={styles.switchRow}>
-          <ThemedText type="default">Auto-pay</ThemedText>
-          <Switch value={autoPay} onValueChange={setAutoPay} />
-        </View>
-
-        <Field label="Notes (optional)">
-          <TextInput
-            style={[styles.input, styles.notesInput, { color: theme.text }]}
-            placeholder="Add a note..."
-            placeholderTextColor={theme.textSecondary}
-            value={notes}
-            onChangeText={setNotes}
-            multiline
-          />
-        </Field>
-
-        <Pressable style={styles.saveButton} onPress={handleSave}>
-          <ThemedText type="default" style={styles.saveButtonText}>
-            {isEditing ? "Save changes" : "Add subscription"}
-          </ThemedText>
-        </Pressable>
-
-        {isEditing && (
-          <Pressable style={styles.deleteButton} onPress={handleDelete}>
-            <ThemedText type="default" style={styles.deleteButtonText}>
-              Delete subscription
-            </ThemedText>
-          </Pressable>
-        )}
-      </ScrollView>
-    </ThemedView>
+        </ScrollView>
+      </ThemedView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -382,7 +333,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FBF9F6",
   },
   content: {
-    padding: Spacing.three,
+    padding: Spacing.two,
     gap: Spacing.three,
     paddingBottom: Spacing.six,
   },
@@ -436,6 +387,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#4F46E5",
     borderRadius: Spacing.three,
     paddingVertical: Spacing.three,
+    marginHorizontal: Spacing.three,
     alignItems: "center",
     marginTop: Spacing.two,
   },

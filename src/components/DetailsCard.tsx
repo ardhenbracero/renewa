@@ -4,8 +4,16 @@ export function DetailsCard({ children }: { children: React.ReactNode }) {
   return <View style={styles.card}>{children}</View>;
 }
 
-export function DetailsSection({ children }: { children: React.ReactNode }) {
-  return <View style={styles.section}>{children}</View>;
+export function DetailsSection({
+  children,
+  last,
+}: {
+  children: React.ReactNode;
+  last?: boolean;
+}) {
+  return (
+    <View style={[styles.section, last && styles.sectionLast]}>{children}</View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -24,5 +32,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#F3F4F6",
+  },
+  sectionLast: {
+    borderBottomWidth: 0,
   },
 });

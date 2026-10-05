@@ -59,9 +59,10 @@ const styles = StyleSheet.create({
     gap: 12,
     borderWidth: 2,
     borderColor: "rgb(236,230,223, 0.5)",
+    backgroundColor: "#F3F4F6",
     paddingVertical: 5,
     paddingHorizontal: 15,
-    borderRadius: 30,
+    borderRadius: 12,
   },
   badge: {
     width: 36,
