@@ -1,4 +1,5 @@
 import { BottomTabBar } from "@/components/bottom-tab-bar";
+import { RenewingSoonSection } from "@/components/RenewingSoonSection";
 import { SubscriptionRow } from "@/components/subscription-row";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -42,7 +43,6 @@ export default function VaultScreen() {
                   Here's what's coming up
                 </ThemedText>
               </View>
-
               <LinearGradient
                 colors={["#4338CA", "#5B21B6", "#3730A3"]}
                 start={{ x: 0, y: 0 }}
@@ -76,7 +76,6 @@ export default function VaultScreen() {
                   </ThemedText>
                 </View>
               </LinearGradient>
-
               {renewingSoon.length > 0 && (
                 <View style={styles.soonSection}>
                   <ThemedText type="smallBold" style={styles.sectionTitle}>
@@ -111,6 +110,7 @@ export default function VaultScreen() {
                 </View>
               )}
 
+              <RenewingSoonSection renewingSoon={renewingSoon} />
               <ThemedText type="smallBold" style={styles.sectionTitle}>
                 All Subscriptions
               </ThemedText>
