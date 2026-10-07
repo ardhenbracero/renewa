@@ -28,6 +28,7 @@ function addInterval(
 export function getUpcomingRenewalDate(sub: Subscription): Date {
   let next = new Date(sub.nextRenewalDate);
   const today = new Date();
+  today.setHours(0, 0, 0, 0); // ← add this line
 
   while (next < today) {
     next = addInterval(next, sub.billingCycle, sub.customIntervalDays);

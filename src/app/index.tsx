@@ -4,10 +4,9 @@ import { SubscriptionRow } from "@/components/subscription-row";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Colors, Spacing } from "@/constants/theme";
-import { daysUntil, useSubscriptions } from "@/hooks/use-subscriptions";
+import { useSubscriptions } from "@/hooks/use-subscriptions";
 import { useTheme } from "@/hooks/use-theme";
 import { formatCurrency } from "@/utils/format";
-import { getUpcomingRenewalDate } from "@db/dateLogic";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
@@ -76,39 +75,6 @@ export default function VaultScreen() {
                   </ThemedText>
                 </View>
               </LinearGradient>
-              {renewingSoon.length > 0 && (
-                <View style={styles.soonSection}>
-                  <ThemedText type="smallBold" style={styles.sectionTitle}>
-                    Renewing soon
-                  </ThemedText>
-                  <FlatList
-                    data={renewingSoon}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    keyExtractor={(item) => `soon-${item.id}`}
-                    contentContainerStyle={styles.soonList}
-                    renderItem={({ item }) => {
-                      const days = daysUntil(getUpcomingRenewalDate(item));
-                      return (
-                        <ThemedView
-                          type="backgroundElement"
-                          style={styles.soonCard}
-                        >
-                          <ThemedText type="default" numberOfLines={1}>
-                            {item.name}
-                          </ThemedText>
-                          <ThemedText type="small" themeColor="textSecondary">
-                            {days <= 0 ? "Due today" : `in ${days}d`}
-                          </ThemedText>
-                          <ThemedText type="smallBold" style={styles.soonPrice}>
-                            {formatCurrency(item.amount, item.currency)}
-                          </ThemedText>
-                        </ThemedView>
-                      );
-                    }}
-                  />
-                </View>
-              )}
 
               <RenewingSoonSection renewingSoon={renewingSoon} />
               <ThemedText type="smallBold" style={styles.sectionTitle}>
