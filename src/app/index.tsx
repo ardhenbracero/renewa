@@ -4,9 +4,11 @@ import { SubscriptionRow } from "@/components/subscription-row";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Colors, Spacing } from "@/constants/theme";
+import { useProfile } from "@/context/profile-context";
 import { useSubscriptions } from "@/hooks/use-subscriptions";
 import { useTheme } from "@/hooks/use-theme";
 import { formatCurrency } from "@/utils/format";
+import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
@@ -17,6 +19,7 @@ export default function VaultScreen() {
   const router = useRouter();
   const { subscriptions, renewingSoon, monthlyTotal, yearlyTotal, refresh } =
     useSubscriptions();
+  const { name } = useProfile();
 
   const theme = useTheme();
   const activeCount = subscriptions.filter((s) => s.status === "active").length;
@@ -37,7 +40,7 @@ export default function VaultScreen() {
           ListHeaderComponent={
             <View>
               <View style={styles.header}>
-                <ThemedText type="subtitle">Hi, </ThemedText>
+                <ThemedText type="subtitle">Hi, {name || "there"}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
                   Here's what's coming up
                 </ThemedText>
@@ -48,6 +51,14 @@ export default function VaultScreen() {
                 end={{ x: 1, y: 1 }}
                 style={styles.summaryCard}
               >
+                {/* Decorative background icon */}
+                <Ionicons
+                  name="reload-outline"
+                  size={140}
+                  color="#FFFFFF"
+                  style={styles.bgIcon}
+                  pointerEvents="none"
+                />
                 <View style={styles.activeSub}>
                   <ThemedText type="small" themeColor="onAccent">
                     MONTHLY RECURRING
@@ -110,6 +121,12 @@ export default function VaultScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   safeArea: { flex: 1 },
+  bgIcon: {
+    position: "absolute",
+    right: -10,
+    opacity: 0.12,
+    transform: [{ rotate: "-15deg" }],
+  },
   listContent: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.six },
   header: { paddingVertical: Spacing.three },
   summaryCard: {
@@ -117,6 +134,7 @@ const styles = StyleSheet.create({
     padding: Spacing.four,
     gap: Spacing.two,
     marginBottom: Spacing.four,
+    overflow: "hidden",
   },
   totalText: {
     fontSize: 36,

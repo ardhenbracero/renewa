@@ -32,7 +32,7 @@ export function RenewingSoonSection({ renewingSoon }: { renewingSoon: any[] }) {
           const days = daysUntil(getUpcomingRenewalDate(item));
           const isUrgent = days <= 0;
           const dueLabel =
-            days <= 0 ? "Due today" : days === 1 ? "1 day" : `${days} days`;
+            days <= 0 ? "Today" : days === 1 ? "1 day" : `${days} days`;
 
           return (
             <Pressable
@@ -45,15 +45,26 @@ export function RenewingSoonSection({ renewingSoon }: { renewingSoon: any[] }) {
                   iconSlug={item.iconSlug}
                   size={36}
                 />
-                <ThemedText
-                  style={[styles.nearDue, isUrgent && styles.nearDueUrgent]}
+
+                <View
+                  style={[styles.duePill, isUrgent && styles.duePillUrgent]}
                 >
-                  {dueLabel}
-                </ThemedText>
+                  <ThemedText
+                    style={[
+                      styles.duePillText,
+                      isUrgent && styles.duePillTextUrgent,
+                    ]}
+                  >
+                    {dueLabel}
+                  </ThemedText>
+                </View>
               </View>
 
               <ThemedText style={styles.name} numberOfLines={1}>
                 {item.name}
+              </ThemedText>
+              <ThemedText style={styles.nameCategory}>
+                {item.category}
               </ThemedText>
               <View style={styles.hr} />
               <View style={styles.titleRow}>
@@ -129,19 +140,30 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#6B7280",
   },
-  nearDue: {
+  nameCategory: {
+    fontSize: 12,
+    lineHeight: 15,
+    color: "#6B7280",
+  },
+  duePill: {
+    alignSelf: "flex-start",
     backgroundColor: "#FFFCEA",
-    borderRadius: 30,
     borderWidth: 2,
     borderColor: "#FFF3CB",
-    paddingHorizontal: 7,
-    paddingVertical: 4,
-    fontSize: 12,
-    fontWeight: "600",
+    borderRadius: 30,
+    paddingHorizontal: 8,
+    paddingVertical: 1,
   },
-  nearDueUrgent: {
+  duePillUrgent: {
     backgroundColor: "#FEE2E2",
     borderColor: "#FECACA",
+  },
+  duePillText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#B45309",
+  },
+  duePillTextUrgent: {
     color: "#DC2626",
   },
   titleRow: {
