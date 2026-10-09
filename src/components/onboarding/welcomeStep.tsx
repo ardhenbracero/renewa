@@ -47,7 +47,8 @@ export function WelcomeStep() {
       </ThemedText>
       <ThemedText style={styles.body}>
         Keep every subscription in one place, see what's due next, and know your
-        monthly total at a glance. Everything stays on your phone.
+        monthly total at a glance. Everything stays on your phone without
+        connecting to your any bank account.
       </ThemedText>
 
       <View style={styles.featureRow}>
@@ -90,7 +91,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   body: { fontSize: 15, lineHeight: 22, color: "#4B5563", marginTop: 10 },
-  featureRow: { flexDirection: "row", gap: 10, marginTop: 18 },
+  featureRow: { flexDirection: "row", gap: 10, marginTop: 10 },
   feature: {
     flex: 1,
     flexDirection: "row",
@@ -109,5 +110,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   featureTitle: { fontSize: 13, fontWeight: "700", color: "#111827" },
-  featureSub: { fontSize: 11, color: "#6B7280", marginTop: 1 },
+  featureSub: { fontSize: 11, lineHeight: 15, color: "#6B7280", marginTop: 1 },
 });

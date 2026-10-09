@@ -27,6 +27,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
+        await AsyncStorage.multiRemove([NAME_KEY, ONBOARDED_KEY]); // TEMP: remove after testing
+
         const [savedName, savedFlag] = await Promise.all([
           AsyncStorage.getItem(NAME_KEY),
           AsyncStorage.getItem(ONBOARDED_KEY),

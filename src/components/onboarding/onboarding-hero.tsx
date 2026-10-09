@@ -4,6 +4,77 @@ import { StyleSheet, View } from "react-native";
 
 import { BrandIcon, getBrandHex } from "@/components/brand-icon";
 import { ThemedText } from "@/components/themed-text";
+import { useEffect } from "react";
+import Animated, {
+    cancelAnimation,
+    Easing,
+    SharedValue,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withTiming,
+} from "react-native-reanimated";
+
+const LOOP_MS = 5000;
+const START = 0.1;
+const END = 0.6;
+
+function easeInOut(t: number) {
+  "worklet";
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+type SpinProps = {
+  progress: SharedValue<number>;
+  start: number; // where in the 0..1 loop this card begins moving
+  end: number; // where it finishes
+  kind: "full" | "return"; // full = one continuous turn, return = go to peak then back
+  peak?: number; // degrees (360 for full, or the max angle for return)
+  axis?: "z" | "y"; // z = spin flat, y = flip like a card
+  baseDeg?: number; // the card's resting tilt
+  style?: any;
+  children: React.ReactNode;
+};
+
+function Spin({
+  progress,
+  start,
+  end,
+  kind,
+  peak = 360,
+  axis = "z",
+  baseDeg = 0,
+  style,
+  children,
+}: SpinProps) {
+  const animatedStyle = useAnimatedStyle(() => {
+    const raw = (progress.value - start) / (end - start);
+    const t = Math.min(Math.max(raw, 0), 1);
+
+    let angle = 0;
+    if (kind === "full") {
+      angle = peak * easeInOut(t);
+    } else {
+      const u = t < 0.5 ? t * 2 : (1 - t) * 2; // up, then back down
+      angle = peak * easeInOut(u);
+    }
+
+    if (axis === "y") {
+      return {
+        transform: [
+          { perspective: 700 },
+          { rotate: `${baseDeg}deg` },
+          { rotateY: `${angle}deg` },
+        ],
+      };
+    }
+    return { transform: [{ rotate: `${baseDeg + angle}deg` }] };
+  });
+
+  return (
+    <Animated.View style={[style, animatedStyle]}>{children}</Animated.View>
+  );
+}
 
 const ACCENT = "#4338CA";
 
@@ -26,6 +97,16 @@ function Badge({ slug, size = 36 }: { slug: string; size?: number }) {
 }
 
 export function OnboardingHero() {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withRepeat(
+      withTiming(1, { duration: LOOP_MS, easing: Easing.linear }),
+      -1, // loop forever
+      false, // jump back to 0 instead of reversing
+    );
+    return () => cancelAnimation(progress);
+  }, [progress]);
   return (
     <LinearGradient
       colors={["#5B21B6", "#4338CA", "#3730A3"]}
@@ -45,36 +126,76 @@ export function OnboardingHero() {
       </View>
 
       {/* iCloud */}
-      <View style={[styles.floatCard, styles.icloud]}>
+      <Spin
+        progress={progress}
+        start={START}
+        end={END}
+        kind="return"
+        peak={180}
+        axis="y"
+        baseDeg={6}
+        style={[styles.floatCard, styles.icloud]}
+      >
         <Badge slug="icloud" size={30} />
         <View>
           <ThemedText style={styles.cardName}>iCloud+</ThemedText>
           <ThemedText style={styles.cardSub}>$0.99</ThemedText>
         </View>
-      </View>
+      </Spin>
 
       {/* YouTube */}
-      <View style={[styles.floatCard, styles.youtube]}>
+      <Spin
+        progress={progress}
+        start={START}
+        end={END}
+        kind="full"
+        peak={360}
+        baseDeg={-8}
+        style={[styles.floatCard, styles.youtube]}
+      >
         <BrandIcon slug="youtube" size={30} />
-      </View>
+      </Spin>
 
-      {/* Spotify */}
-      <View style={[styles.floatCard, styles.spotify]}>
+      {/* Spotify 20 */}
+      <Spin
+        progress={progress}
+        start={START}
+        end={END}
+        kind="return"
+        peak={20}
+        baseDeg={-4}
+        style={[styles.floatCard, styles.spotify]}
+      >
         <Badge slug="spotify" size={30} />
         <View>
           <ThemedText style={styles.cardName}>Spotify</ThemedText>
           <ThemedText style={styles.cardSub}>$10.99/mo</ThemedText>
         </View>
-      </View>
+      </Spin>
 
-      {/* ChatGPT */}
-      <View style={[styles.floatCard, styles.chatgpt]}>
+      {/* ChatGPT 30 */}
+      <Spin
+        progress={progress}
+        start={START}
+        end={END}
+        kind="return"
+        peak={30}
+        baseDeg={3}
+        style={[styles.floatCard, styles.chatgpt]}
+      >
         <Badge slug="openai" size={26} />
         <ThemedText style={styles.cardName}>$20.00</ThemedText>
-      </View>
+      </Spin>
 
-      {/* Netflix (top layer) */}
-      <View style={[styles.floatCard, styles.netflix]}>
+      {/* Netflix (top layer) 40 */}
+      <Spin
+        progress={progress}
+        start={START}
+        end={END}
+        kind="return"
+        peak={40}
+        style={[styles.floatCard, styles.netflix]}
+      >
         <View style={styles.netflixTop}>
           <Badge slug="netflix" size={44} />
           <View style={{ flex: 1 }}>
@@ -91,32 +212,30 @@ export function OnboardingHero() {
           </View>
         </View>
         <View style={styles.netflixBottom}>
-          <ThemedText style={styles.cardSub}>
-            Standard HD · 2 screens
-          </ThemedText>
+          <ThemedText style={styles.cardSub}>Entertainment</ThemedText>
           <View style={styles.autoPayTag}>
             <ThemedText style={styles.autoPayText}>AUTO-PAY</ThemedText>
           </View>
         </View>
-      </View>
+      </Spin>
 
       {/* Bottom summary */}
       <View style={styles.totalBlock}>
         <ThemedText style={styles.totalLabel}>SIMULATED TOTAL</ThemedText>
         <ThemedText style={styles.totalValue}>
-          $87.42 <ThemedText style={styles.totalPer}>/ month</ThemedText>
+          ₱487 <ThemedText style={styles.totalPer}>/ month</ThemedText>
         </ThemedText>
       </View>
       <View style={styles.rightBlock}>
         <ThemedText style={styles.rightTop}>5 active services</ThemedText>
-        <ThemedText style={styles.rightBottom}>~$1,049 / year</ThemedText>
+        <ThemedText style={styles.rightBottom}>~₱1,049 / year</ThemedText>
       </View>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  hero: { height: 320, borderRadius: 32, overflow: "hidden" },
+  hero: { height: 340, borderRadius: 32, overflow: "hidden" },
   badge: { justifyContent: "center", alignItems: "center" },
 
   topRow: {
@@ -246,19 +365,24 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  totalBlock: { position: "absolute", left: 20, bottom: 16 },
+  totalBlock: { position: "absolute", left: 20, bottom: 10 },
   totalLabel: {
     fontSize: 10,
     fontWeight: "700",
     letterSpacing: 0.8,
     color: "rgba(255,255,255,0.7)",
   },
-  totalValue: { fontSize: 34, fontWeight: "800", color: "#FFFFFF" },
+  totalValue: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#FFFFFF",
+    paddingBottom: 8,
+  },
   totalPer: { fontSize: 14, fontWeight: "500", color: "rgba(255,255,255,0.7)" },
   rightBlock: {
     position: "absolute",
     right: 20,
-    bottom: 22,
+    bottom: 18,
     alignItems: "flex-end",
   },
   rightTop: { fontSize: 12, color: "rgba(255,255,255,0.8)" },
