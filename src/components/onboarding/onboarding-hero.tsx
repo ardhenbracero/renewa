@@ -8,6 +8,8 @@ import { useEffect } from "react";
 import Animated, {
     cancelAnimation,
     Easing,
+    Extrapolation,
+    interpolate,
     SharedValue,
     useAnimatedStyle,
     useSharedValue,
@@ -15,9 +17,56 @@ import Animated, {
     withTiming,
 } from "react-native-reanimated";
 
-const LOOP_MS = 5000;
-const START = 0.1;
-const END = 0.6;
+function Pop({
+  progress,
+  start,
+  hideAt,
+  rotate = "0deg",
+  style,
+  children,
+}: {
+  progress: SharedValue<number>;
+  start: number; // fade in begins here
+  hideAt: number; // fade out begins here
+  rotate?: string; // resting tilt
+  style?: any;
+  children: React.ReactNode;
+}) {
+  const animatedStyle = useAnimatedStyle(() => {
+    const p = progress.value;
+    const opacity = interpolate(
+      p,
+      [start, start + 0.05, hideAt, hideAt + 0.06],
+      [0, 1, 1, 0],
+      Extrapolation.CLAMP,
+    );
+    const scale = interpolate(
+      p,
+      [start, start + 0.06, hideAt, hideAt + 0.06],
+      [0.6, 1, 1, 0.92],
+      Extrapolation.CLAMP,
+    );
+    const translateY = interpolate(
+      p,
+      [start, start + 0.06],
+      [18, 0],
+      Extrapolation.CLAMP,
+    );
+    return { opacity, transform: [{ translateY }, { scale }, { rotate }] };
+  });
+
+  return (
+    <Animated.View style={[style, animatedStyle]}>{children}</Animated.View>
+  );
+}
+
+const LOOP_MS = 4000;
+
+const HIDE_AT = 0.4; // small cards start fading out here, done by 0.46
+
+// Netflix starts only after the small cards have settled
+const NETFLIX_START = 0.48;
+const NETFLIX_END = 0.88;
 
 function easeInOut(t: number) {
   "worklet";
@@ -126,14 +175,11 @@ export function OnboardingHero() {
       </View>
 
       {/* iCloud */}
-      <Spin
+      <Pop
         progress={progress}
-        start={START}
-        end={END}
-        kind="return"
-        peak={180}
-        axis="y"
-        baseDeg={6}
+        start={0.04}
+        hideAt={HIDE_AT}
+        rotate="6deg"
         style={[styles.floatCard, styles.icloud]}
       >
         <Badge slug="icloud" size={30} />
@@ -141,29 +187,25 @@ export function OnboardingHero() {
           <ThemedText style={styles.cardName}>iCloud+</ThemedText>
           <ThemedText style={styles.cardSub}>$0.99</ThemedText>
         </View>
-      </Spin>
+      </Pop>
 
       {/* YouTube */}
-      <Spin
+      <Pop
         progress={progress}
-        start={START}
-        end={END}
-        kind="full"
-        peak={360}
-        baseDeg={-8}
+        start={0.1}
+        hideAt={HIDE_AT}
+        rotate="-8deg"
         style={[styles.floatCard, styles.youtube]}
       >
         <BrandIcon slug="youtube" size={30} />
-      </Spin>
+      </Pop>
 
       {/* Spotify 20 */}
-      <Spin
+      <Pop
         progress={progress}
-        start={START}
-        end={END}
-        kind="return"
-        peak={20}
-        baseDeg={-4}
+        start={0.16}
+        hideAt={HIDE_AT}
+        rotate="-4deg"
         style={[styles.floatCard, styles.spotify]}
       >
         <Badge slug="spotify" size={30} />
@@ -171,29 +213,27 @@ export function OnboardingHero() {
           <ThemedText style={styles.cardName}>Spotify</ThemedText>
           <ThemedText style={styles.cardSub}>$10.99/mo</ThemedText>
         </View>
-      </Spin>
+      </Pop>
 
       {/* ChatGPT 30 */}
-      <Spin
+      <Pop
         progress={progress}
-        start={START}
-        end={END}
-        kind="return"
-        peak={30}
-        baseDeg={3}
+        start={0.22}
+        hideAt={HIDE_AT}
+        rotate="3deg"
         style={[styles.floatCard, styles.chatgpt]}
       >
         <Badge slug="openai" size={26} />
         <ThemedText style={styles.cardName}>$20.00</ThemedText>
-      </Spin>
+      </Pop>
 
       {/* Netflix (top layer) 40 */}
       <Spin
         progress={progress}
-        start={START}
-        end={END}
+        start={NETFLIX_START}
+        end={NETFLIX_END}
         kind="return"
-        peak={40}
+        peak={15}
         style={[styles.floatCard, styles.netflix]}
       >
         <View style={styles.netflixTop}>
@@ -298,6 +338,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     padding: 10,
+    zIndex: 1,
     transform: [{ rotate: "6deg" }],
   },
   spotify: {
@@ -312,7 +353,7 @@ const styles = StyleSheet.create({
   },
   chatgpt: {
     right: 28,
-    top: 204,
+    bottom: 80,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
@@ -321,7 +362,15 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     transform: [{ rotate: "3deg" }],
   },
-  netflix: { left: 34, right: 26, top: 100, padding: 14, gap: 10 },
+  netflix: {
+    left: 34,
+    right: 26,
+    top: 100,
+    padding: 8,
+    gap: 10,
+    zIndex: 10,
+    elevation: 8,
+  },
   netflixTop: { flexDirection: "row", alignItems: "center", gap: 12 },
   netflixTitleRow: {
     flexDirection: "row",
