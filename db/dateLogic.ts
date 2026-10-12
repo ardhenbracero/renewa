@@ -37,6 +37,16 @@ export function getUpcomingRenewalDate(sub: Subscription): Date {
   return next;
 }
 
+// The date a subscription moves to when the user taps "Renew":
+// one billing cycle after its current upcoming renewal.
+export function getNextRenewalAfter(sub: Subscription): Date {
+  return addInterval(
+    getUpcomingRenewalDate(sub),
+    sub.billingCycle,
+    sub.customIntervalDays,
+  );
+}
+
 // Converts a subscription's cost into a monthly-equivalent amount,
 // used for the "Monthly total" figure on the Vault screen
 export function toMonthlyAmount(sub: Subscription): number {

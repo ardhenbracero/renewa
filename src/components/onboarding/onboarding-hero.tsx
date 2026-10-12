@@ -60,13 +60,13 @@ function Pop({
   );
 }
 
-const LOOP_MS = 4000;
+const LOOP_MS = 7000;
 
-const HIDE_AT = 0.4; // small cards start fading out here, done by 0.46
+const HIDE_AT = 0.78; // small cards start fading out here, done by 0.46
 
 // Netflix starts only after the small cards have settled
-const NETFLIX_START = 0.48;
-const NETFLIX_END = 0.88;
+const NETFLIX_START = 0.34;
+const NETFLIX_END = 0.72;
 
 function easeInOut(t: number) {
   "worklet";
@@ -185,7 +185,7 @@ export function OnboardingHero() {
         <Badge slug="icloud" size={30} />
         <View>
           <ThemedText style={styles.cardName}>iCloud+</ThemedText>
-          <ThemedText style={styles.cardSub}>$0.99</ThemedText>
+          <ThemedText style={styles.cardSub}>₱59/month</ThemedText>
         </View>
       </Pop>
 
@@ -211,7 +211,7 @@ export function OnboardingHero() {
         <Badge slug="spotify" size={30} />
         <View>
           <ThemedText style={styles.cardName}>Spotify</ThemedText>
-          <ThemedText style={styles.cardSub}>$10.99/mo</ThemedText>
+          <ThemedText style={styles.cardSub}>₱279/month</ThemedText>
         </View>
       </Pop>
 
@@ -224,7 +224,7 @@ export function OnboardingHero() {
         style={[styles.floatCard, styles.chatgpt]}
       >
         <Badge slug="openai" size={26} />
-        <ThemedText style={styles.cardName}>$20.00</ThemedText>
+        <ThemedText style={styles.cardName}>₱1,200/month</ThemedText>
       </Pop>
 
       {/* Netflix (top layer) 40 */}
@@ -247,7 +247,7 @@ export function OnboardingHero() {
               </View>
             </View>
             <ThemedText style={styles.netflixPrice}>
-              $15.49 <ThemedText style={styles.netflixPer}>/ month</ThemedText>
+              ₱169 <ThemedText style={styles.netflixPer}>/ month</ThemedText>
             </ThemedText>
           </View>
         </View>

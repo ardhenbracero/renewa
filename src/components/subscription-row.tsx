@@ -19,12 +19,7 @@ export function SubscriptionRow({
   return (
     <Pressable
       style={styles.row}
-      onPress={() =>
-        router.push({
-          pathname: "/add-subscription",
-          params: { id: String(subscription.id) },
-        })
-      }
+      onPress={() => router.push(`/subscription-details?id=${subscription.id}`)}
     >
       <ServiceIcon name={subscription.name} iconSlug={subscription.iconSlug} />
       <View style={styles.meta}>

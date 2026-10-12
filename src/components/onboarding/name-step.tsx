@@ -1,7 +1,7 @@
+import { ThemedText } from "@/components/themed-text";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
-
-import { ThemedText } from "@/components/themed-text";
+import { FadeUpGroup } from "./fade-up";
 
 const ACCENT = "#4338CA";
 
@@ -25,63 +25,68 @@ export function NameStep({
 
   return (
     <View>
-      <ThemedText style={styles.headline}>What should we call you?</ThemedText>
-      <ThemedText style={styles.sub}>
-        Just for a friendly greeting. Never synced or shared.
-      </ThemedText>
+      <FadeUpGroup step={100}>
+        <ThemedText style={styles.headline}>
+          What should we call you?
+        </ThemedText>
 
-      <View style={styles.inputCard}>
-        <View style={styles.inputTop}>
-          <ThemedText style={styles.label}>YOUR FIRST NAME</ThemedText>
+        <ThemedText style={styles.sub}>
+          Just for a friendly greeting. Never synced or shared.
+        </ThemedText>
+
+        <View style={styles.inputCard}>
+          <View style={styles.inputTop}>
+            <ThemedText style={styles.label}>YOUR FIRST NAME</ThemedText>
+            <View style={styles.initialsBadge}>
+              <ThemedText style={styles.initialsText}>{initials}</ThemedText>
+            </View>
+          </View>
+
+          <View style={styles.inputRow}>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={onChangeName}
+              placeholder="Your first name"
+              placeholderTextColor="#D1D5DB"
+              autoFocus
+              autoCapitalize="words"
+              autoCorrect={false}
+              maxLength={30}
+              returnKeyType="done"
+              onSubmitEditing={onSubmit}
+            />
+            {name.length > 0 && (
+              <Pressable
+                style={styles.clear}
+                onPress={() => onChangeName("")}
+                hitSlop={8}
+              >
+                <Ionicons name="close" size={14} color="#6B7280" />
+              </Pressable>
+            )}
+          </View>
+        </View>
+
+        <View style={styles.previewLabelRow}>
+          <Ionicons name="eye-outline" size={14} color={ACCENT} />
+          <ThemedText style={styles.previewLabel}>HOME PREVIEW</ThemedText>
+        </View>
+
+        <View style={styles.previewCard}>
+          <View style={{ flex: 1 }}>
+            <ThemedText style={styles.previewHi}>
+              Hi, {name.trim() || "there"}
+            </ThemedText>
+            <ThemedText style={styles.previewSub}>
+              Here's what's coming up
+            </ThemedText>
+          </View>
           <View style={styles.initialsBadge}>
             <ThemedText style={styles.initialsText}>{initials}</ThemedText>
           </View>
         </View>
-
-        <View style={styles.inputRow}>
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={onChangeName}
-            placeholder="Your first name"
-            placeholderTextColor="#D1D5DB"
-            autoFocus
-            autoCapitalize="words"
-            autoCorrect={false}
-            maxLength={30}
-            returnKeyType="done"
-            onSubmitEditing={onSubmit}
-          />
-          {name.length > 0 && (
-            <Pressable
-              style={styles.clear}
-              onPress={() => onChangeName("")}
-              hitSlop={8}
-            >
-              <Ionicons name="close" size={14} color="#6B7280" />
-            </Pressable>
-          )}
-        </View>
-      </View>
-
-      <View style={styles.previewLabelRow}>
-        <Ionicons name="eye-outline" size={14} color={ACCENT} />
-        <ThemedText style={styles.previewLabel}>HOME PREVIEW</ThemedText>
-      </View>
-
-      <View style={styles.previewCard}>
-        <View style={{ flex: 1 }}>
-          <ThemedText style={styles.previewHi}>
-            Hi, {name.trim() || "there"}
-          </ThemedText>
-          <ThemedText style={styles.previewSub}>
-            Here's what's coming up
-          </ThemedText>
-        </View>
-        <View style={styles.initialsBadge}>
-          <ThemedText style={styles.initialsText}>{initials}</ThemedText>
-        </View>
-      </View>
+      </FadeUpGroup>
     </View>
   );
 }

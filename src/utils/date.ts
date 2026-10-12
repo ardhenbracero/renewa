@@ -28,3 +28,12 @@ export function daysUntil(iso: string): number {
   const diffMs = target.getTime() - today.getTime();
   return Math.round(diffMs / (1000 * 60 * 60 * 24));
 }
+
+export function formatDate(date: Date, withWeekday = false): string {
+  return date.toLocaleDateString("en-US", {
+    ...(withWeekday ? { weekday: "short" as const } : {}),
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
