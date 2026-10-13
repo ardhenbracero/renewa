@@ -14,6 +14,11 @@ import { getNextRenewalAfter, getUpcomingRenewalDate } from "@db/dateLogic";
 import type { Subscription } from "@db/schema";
 import { getSubscriptionById, updateSubscription } from "@db/subscriptions";
 
+import { AddMemberSheet } from "@/components/subscription-details/add-member-sheet";
+import { FamilySharingSection } from "@/components/subscription-details/family-sharing-section";
+import { useProfile } from "@/context/profile-context";
+import { useMembers } from "@/hooks/use-members";
+
 function cycleLabel(sub: Subscription) {
   switch (sub.billingCycle) {
     case "weekly":
@@ -73,6 +78,29 @@ export default function SubscriptionDetailsScreen() {
     setRenewed(true);
     timer.current = setTimeout(() => setRenewed(false), 1800);
   }
+
+  // inside the component, below the existing useState lines:
+  const { name: profileName } = useProfile();
+  const {
+    members,
+    addNewMember,
+    removeMember,
+    togglePaid,
+    resetPaid,
+    refresh: refreshMembers,
+  } = useMembers(subId, profileName);
+  const [sheetVisible, setSheetVisible] = useState(false);
+
+  // reload both when the screen gains focus:
+  useFocusEffect(
+    useCallback(() => {
+      load();
+      refreshMembers();
+    }, [load, refreshMembers]),
+  );
+
+  // in handleRenew, after updateSubscription(...):
+  resetPaid();
 
   return (
     <ThemedView style={styles.container}>
@@ -137,7 +165,28 @@ export default function SubscriptionDetailsScreen() {
               onPress={handleRenew}
             />
 
-            {/* Family Sharing section goes here next */}
+            <FamilySharingSection
+              total={sub.amount}
+              currency={sub.currency}
+              members={members}
+              onAddPress={() => setSheetVisible(true)}
+              onTogglePaid={togglePaid}
+              onRemove={removeMember}
+              onReset={resetPaid}
+            />
+            {sub && (
+              <AddMemberSheet
+                visible={sheetVisible}
+                onClose={() => setSheetVisible(false)}
+                onAdd={(name) => {
+                  addNewMember(name);
+                  setSheetVisible(false);
+                }}
+                total={sub.amount}
+                currency={sub.currency}
+                existingCount={members.length}
+              />
+            )}
           </ScrollView>
         )}
       </SafeAreaView>

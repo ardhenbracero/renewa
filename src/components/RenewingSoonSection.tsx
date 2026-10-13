@@ -6,10 +6,8 @@ import { getUpcomingRenewalDate } from "@db/dateLogic";
 import { router } from "expo-router";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 
-// TEMPORARY — hardcoded test data, remove once confirmed working
-
 export function RenewingSoonSection({ renewingSoon }: { renewingSoon: any[] }) {
-  if (renewingSoon.length === 0) return null;
+  // TEMPORARY — hardcoded test data, remove once confirmed working
 
   return (
     <View style={styles.wrapper}>
@@ -37,7 +35,7 @@ export function RenewingSoonSection({ renewingSoon }: { renewingSoon: any[] }) {
           return (
             <Pressable
               style={styles.card}
-              onPress={() => router.push(`/add-subscription?id=${item.id}`)}
+              onPress={() => router.push(`/subscription-details?id=${item.id}`)}
             >
               <View style={styles.titleRow}>
                 <ServiceIcon
