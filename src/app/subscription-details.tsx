@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { DetailsCard, DetailsSection } from "@/components/DetailsCard";
+import { FadeUpGroup } from "@/components/fade-up";
 import { DetailsHero } from "@/components/subscription-details/details-hero";
 import { RenewButton } from "@/components/subscription-details/renew-button";
 import { ThemedText } from "@/components/themed-text";
@@ -74,6 +75,7 @@ export default function SubscriptionDetailsScreen() {
     if (!sub || renewed) return;
     const next = getNextRenewalAfter(sub);
     updateSubscription(sub.id, { nextRenewalDate: toIsoDate(next) });
+    resetPaid();
     load();
     setRenewed(true);
     timer.current = setTimeout(() => setRenewed(false), 1800);
@@ -100,7 +102,7 @@ export default function SubscriptionDetailsScreen() {
   );
 
   // in handleRenew, after updateSubscription(...):
-  resetPaid();
+  // resetPaid();
 
   return (
     <ThemedView style={styles.container}>
@@ -139,41 +141,45 @@ export default function SubscriptionDetailsScreen() {
             <DetailsHero sub={sub} />
 
             <DetailsCard>
-              <DetailsSection>
-                <InfoRow
-                  label="NEXT RENEWAL"
-                  value={formatDate(getUpcomingRenewalDate(sub), true)}
-                />
-              </DetailsSection>
-              <DetailsSection>
-                <InfoRow label="BILLING CYCLE" value={cycleLabel(sub)} />
-              </DetailsSection>
-              <DetailsSection>
-                <InfoRow label="CATEGORY" value={sub.category} />
-              </DetailsSection>
-              <DetailsSection last>
-                <InfoRow
-                  label="STARTED"
-                  value={formatDate(parseIsoDate(sub.startDate.slice(0, 10)))}
-                />
-              </DetailsSection>
+              <FadeUpGroup step={100}>
+                <DetailsSection>
+                  <InfoRow
+                    label="NEXT RENEWAL"
+                    value={formatDate(getUpcomingRenewalDate(sub), true)}
+                  />
+                </DetailsSection>
+                <DetailsSection>
+                  <InfoRow label="BILLING CYCLE" value={cycleLabel(sub)} />
+                </DetailsSection>
+                <DetailsSection>
+                  <InfoRow label="CATEGORY" value={sub.category} />
+                </DetailsSection>
+                <DetailsSection last>
+                  <InfoRow
+                    label="STARTED"
+                    value={formatDate(parseIsoDate(sub.startDate.slice(0, 10)))}
+                  />
+                </DetailsSection>
+              </FadeUpGroup>
             </DetailsCard>
 
-            <RenewButton
-              nextDateLabel={formatDate(getNextRenewalAfter(sub))}
-              renewed={renewed}
-              onPress={handleRenew}
-            />
+            <FadeUpGroup step={100}>
+              <RenewButton
+                nextDateLabel={formatDate(getNextRenewalAfter(sub))}
+                renewed={renewed}
+                onPress={handleRenew}
+              />
 
-            <FamilySharingSection
-              total={sub.amount}
-              currency={sub.currency}
-              members={members}
-              onAddPress={() => setSheetVisible(true)}
-              onTogglePaid={togglePaid}
-              onRemove={removeMember}
-              onReset={resetPaid}
-            />
+              <FamilySharingSection
+                total={sub.amount}
+                currency={sub.currency}
+                members={members}
+                onAddPress={() => setSheetVisible(true)}
+                onTogglePaid={togglePaid}
+                onRemove={removeMember}
+                onReset={resetPaid}
+              />
+            </FadeUpGroup>
             {sub && (
               <AddMemberSheet
                 visible={sheetVisible}

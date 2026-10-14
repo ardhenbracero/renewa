@@ -1,4 +1,5 @@
 import { BottomTabBar } from "@/components/bottom-tab-bar";
+import { FadeUp, FadeUpGroup } from "@/components/fade-up";
 import { RenewingSoonSection } from "@/components/RenewingSoonSection";
 import { SubscriptionRow } from "@/components/subscription-row";
 import { ThemedText } from "@/components/themed-text";
@@ -38,62 +39,69 @@ export default function VaultScreen() {
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={styles.listContent}
           ListHeaderComponent={
-            <View>
-              <View style={styles.header}>
-                <ThemedText type="subtitle">Hi, {name || "there"}</ThemedText>
-                <ThemedText type="small" themeColor="textSecondary">
-                  Here's what's coming up
-                </ThemedText>
-              </View>
-              <LinearGradient
-                colors={["#4338CA", "#5B21B6", "#3730A3"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.summaryCard}
-              >
-                {/* Decorative background icon */}
-                <Ionicons
-                  name="reload-outline"
-                  size={140}
-                  color="#FFFFFF"
-                  style={styles.bgIcon}
-                  pointerEvents="none"
-                />
-                <View style={styles.activeSub}>
-                  <ThemedText type="small" themeColor="onAccent">
-                    MONTHLY RECURRING
+            <FadeUpGroup step={90}>
+              <View>
+                <View style={styles.header}>
+                  <ThemedText type="subtitle">Hi, {name || "there"}</ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    Here's what's coming up
                   </ThemedText>
-                  <View style={styles.activeSubRow}>
-                    <ThemedText
-                      type="smallBold"
-                      style={styles.activeSubscription}
-                    >
-                      <View style={styles.activeDot} /> {activeCount} active
+                </View>
+
+                <LinearGradient
+                  colors={["#4338CA", "#5B21B6", "#3730A3"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.summaryCard}
+                >
+                  {/* Decorative background icon */}
+                  <Ionicons
+                    name="reload-outline"
+                    size={140}
+                    color="#FFFFFF"
+                    style={styles.bgIcon}
+                    pointerEvents="none"
+                  />
+                  <View style={styles.activeSub}>
+                    <ThemedText type="small" themeColor="onAccent">
+                      MONTHLY RECURRING
+                    </ThemedText>
+                    <View style={styles.activeSubRow}>
+                      <ThemedText
+                        type="smallBold"
+                        style={styles.activeSubscription}
+                      >
+                        <View style={styles.activeDot} /> {activeCount} active
+                      </ThemedText>
+                    </View>
+                  </View>
+                  <ThemedText type="title" style={styles.totalText}>
+                    {formatCurrency(monthlyTotal)}{" "}
+                    <ThemedText themeColor="onAccent">/ month</ThemedText>
+                  </ThemedText>
+                  <View style={styles.divider} />
+                  <View style={styles.yearlyRow}>
+                    <ThemedText type="small" themeColor="onAccent">
+                      Estimated yearly outlay
+                    </ThemedText>
+                    <ThemedText type="smallBold" themeColor="onAccent">
+                      {formatCurrency(yearlyTotal)}
                     </ThemedText>
                   </View>
-                </View>
-                <ThemedText type="title" style={styles.totalText}>
-                  {formatCurrency(monthlyTotal)}{" "}
-                  <ThemedText themeColor="onAccent">/ month</ThemedText>
-                </ThemedText>
-                <View style={styles.divider} />
-                <View style={styles.yearlyRow}>
-                  <ThemedText type="small" themeColor="onAccent">
-                    Estimated yearly outlay
-                  </ThemedText>
-                  <ThemedText type="smallBold" themeColor="onAccent">
-                    {formatCurrency(yearlyTotal)}
-                  </ThemedText>
-                </View>
-              </LinearGradient>
+                </LinearGradient>
 
-              <RenewingSoonSection renewingSoon={renewingSoon} />
-              <ThemedText type="smallBold" style={styles.sectionTitle}>
-                All Subscriptions
-              </ThemedText>
-            </View>
+                <RenewingSoonSection renewingSoon={renewingSoon} />
+                <ThemedText type="smallBold" style={styles.sectionTitle}>
+                  All Subscriptions
+                </ThemedText>
+              </View>
+            </FadeUpGroup>
           }
-          renderItem={({ item }) => <SubscriptionRow subscription={item} />}
+          renderItem={({ item, index }) => (
+            <FadeUp delay={index < 6 ? 400 + index * 70 : 0}>
+              <SubscriptionRow subscription={item} />
+            </FadeUp>
+          )}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
             <View style={styles.empty}>

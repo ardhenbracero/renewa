@@ -1,12 +1,12 @@
-import { LinearGradient } from "expo-linear-gradient";
-import { StyleSheet, View } from "react-native";
-
+import { FadeUpGroup } from "@/components/fade-up";
 import { ServiceIcon } from "@/components/service-icon";
 import { ThemedText } from "@/components/themed-text";
 import { daysUntil } from "@/hooks/use-subscriptions";
 import { formatCurrency } from "@/utils/format";
 import { getUpcomingRenewalDate, toMonthlyAmount } from "@db/dateLogic";
 import type { Subscription } from "@db/schema";
+import { LinearGradient } from "expo-linear-gradient";
+import { StyleSheet, View } from "react-native";
 
 function cycleSuffix(sub: Subscription) {
   switch (sub.billingCycle) {
@@ -37,52 +37,54 @@ export function DetailsHero({ sub }: { sub: Subscription }) {
       : `EQUIVALENT TO ${formatCurrency(toMonthlyAmount(sub) * 12, sub.currency)} / YEAR`;
 
   return (
-    <LinearGradient
-      colors={["#4338CA", "#5B21B6", "#3730A3"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.card}
-    >
-      <View style={styles.topRow}>
-        <ServiceIcon name={sub.name} iconSlug={sub.iconSlug} size={56} />
+    <FadeUpGroup step={100}>
+      <LinearGradient
+        colors={["#4338CA", "#5B21B6", "#3730A3"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.card}
+      >
+        <View style={styles.topRow}>
+          <ServiceIcon name={sub.name} iconSlug={sub.iconSlug} size={56} />
 
-        <View style={styles.titleBlock}>
-          <ThemedText style={styles.name} numberOfLines={1}>
-            {sub.name}
-          </ThemedText>
-          <ThemedText style={styles.category} numberOfLines={1}>
-            {sub.category}
-          </ThemedText>
-        </View>
-
-        <View style={styles.rightCol}>
-          <View style={[styles.duePill, urgent && styles.duePillUrgent]}>
-            <ThemedText
-              style={[styles.dueText, urgent && styles.dueTextUrgent]}
-            >
-              {dueLabel}
+          <View style={styles.titleBlock}>
+            <ThemedText style={styles.name} numberOfLines={1}>
+              {sub.name}
+            </ThemedText>
+            <ThemedText style={styles.category} numberOfLines={1}>
+              {sub.category}
             </ThemedText>
           </View>
 
-          {sub.autoPay && (
-            <View style={styles.tag}>
-              <ThemedText style={styles.tagText}>Auto-pay</ThemedText>
+          <View style={styles.rightCol}>
+            <View style={[styles.duePill, urgent && styles.duePillUrgent]}>
+              <ThemedText
+                style={[styles.dueText, urgent && styles.dueTextUrgent]}
+              >
+                {dueLabel}
+              </ThemedText>
             </View>
-          )}
-          {sub.isTrial && (
-            <View style={styles.tag}>
-              <ThemedText style={styles.tagText}>Free trial</ThemedText>
-            </View>
-          )}
-        </View>
-      </View>
 
-      <ThemedText style={styles.price}>
-        {formatCurrency(sub.amount, sub.currency)}{" "}
-        <ThemedText style={styles.per}>{cycleSuffix(sub)}</ThemedText>
-      </ThemedText>
-      <ThemedText style={styles.equivalent}>{equivalent}</ThemedText>
-    </LinearGradient>
+            {sub.autoPay && (
+              <View style={styles.tag}>
+                <ThemedText style={styles.tagText}>Auto-pay</ThemedText>
+              </View>
+            )}
+            {sub.isTrial && (
+              <View style={styles.tag}>
+                <ThemedText style={styles.tagText}>Free trial</ThemedText>
+              </View>
+            )}
+          </View>
+        </View>
+
+        <ThemedText style={styles.price}>
+          {formatCurrency(sub.amount, sub.currency)}{" "}
+          <ThemedText style={styles.per}>{cycleSuffix(sub)}</ThemedText>
+        </ThemedText>
+        <ThemedText style={styles.equivalent}>{equivalent}</ThemedText>
+      </LinearGradient>
+    </FadeUpGroup>
   );
 }
 

@@ -1,15 +1,34 @@
-import { and, eq } from "drizzle-orm";
+import db from "./database";
+import type { Member } from "./schema";
 
-import { db } from "./database"; // adjust to however you export your db
-import { Member, members } from "./schema";
+type MemberRow = {
+  id: number;
+  subscription_id: number;
+  name: string;
+  is_manager: number;
+  paid: number;
+  created_at: string;
+};
+
+// SQLite stores booleans as 0/1 and uses snake_case columns,
+// so convert each row into the Member shape the app uses.
+function toMember(row: MemberRow): Member {
+  return {
+    id: row.id,
+    subscriptionId: row.subscription_id,
+    name: row.name,
+    isManager: row.is_manager === 1,
+    paid: row.paid === 1,
+    createdAt: row.created_at,
+  };
+}
 
 export function getMembers(subscriptionId: number): Member[] {
-  return db
-    .select()
-    .from(members)
-    .where(eq(members.subscriptionId, subscriptionId))
-    .orderBy(members.id)
-    .all();
+  const rows = db.getAllSync<MemberRow>(
+    "SELECT * FROM members WHERE subscription_id = ? ORDER BY id",
+    [subscriptionId],
+  );
+  return rows.map(toMember);
 }
 
 export function addMember(
@@ -17,38 +36,35 @@ export function addMember(
   name: string,
   isManager = false,
 ) {
-  db.insert(members)
-    .values({
+  db.runSync(
+    `INSERT INTO members (subscription_id, name, is_manager, paid, created_at)
+     VALUES (?, ?, ?, ?, ?)`,
+    [
       subscriptionId,
       name,
-      isManager,
-      paid: isManager, // the manager already pays the provider
-      createdAt: new Date().toISOString(),
-    })
-    .run();
+      isManager ? 1 : 0,
+      isManager ? 1 : 0, // the manager already pays the provider
+      new Date().toISOString(),
+    ],
+  );
 }
 
 export function setMemberPaid(id: number, paid: boolean) {
-  db.update(members).set({ paid }).where(eq(members.id, id)).run();
+  db.runSync("UPDATE members SET paid = ? WHERE id = ?", [paid ? 1 : 0, id]);
 }
 
 export function deleteMember(id: number) {
-  db.delete(members).where(eq(members.id, id)).run();
+  db.runSync("DELETE FROM members WHERE id = ?", [id]);
 }
 
 export function deleteMembersForSubscription(subscriptionId: number) {
-  db.delete(members).where(eq(members.subscriptionId, subscriptionId)).run();
+  db.runSync("DELETE FROM members WHERE subscription_id = ?", [subscriptionId]);
 }
 
 // New billing cycle: everyone except the manager goes back to unpaid
 export function resetPaidForSubscription(subscriptionId: number) {
-  db.update(members)
-    .set({ paid: false })
-    .where(
-      and(
-        eq(members.subscriptionId, subscriptionId),
-        eq(members.isManager, false),
-      ),
-    )
-    .run();
+  db.runSync(
+    "UPDATE members SET paid = 0 WHERE subscription_id = ? AND is_manager = 0",
+    [subscriptionId],
+  );
 }

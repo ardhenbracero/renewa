@@ -37,6 +37,7 @@ function RootNavigator() {
           name="add-subscription"
           options={{ presentation: "modal", headerShown: false }}
         />
+        <Stack.Screen name="subscription-details" />
       </Stack.Protected>
     </Stack>
   );

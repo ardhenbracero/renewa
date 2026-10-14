@@ -1,7 +1,7 @@
+import { FadeUpGroup } from "@/components/fade-up";
 import { ThemedText } from "@/components/themed-text";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
-import { FadeUpGroup } from "./fade-up";
 
 const ACCENT = "#4338CA";
 
