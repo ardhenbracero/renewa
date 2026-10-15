@@ -1,18 +1,21 @@
-import { useFocusEffect } from "expo-router";
+import { BottomTabBar } from "@/components/bottom-tab-bar";
+import { FadeUpGroup } from "@/components/fade-up";
+import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import { BottomTabBar } from "@/components/bottom-tab-bar";
-import { colorForName } from "@/components/service-icon";
-import { SubscriptionRow } from "@/components/subscription-row";
+// import { SubscriptionRow } from "@/components/subscription-row";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Spacing } from "@/constants/theme";
 import { useSubscriptions } from "@/hooks/use-subscriptions";
 import { formatCurrency } from "@/utils/format";
 import { getRenewalOccurrencesInMonth } from "@db/dateLogic";
 import { Subscription } from "@db/schema";
+
+import { CalendarCard } from "@/components/timeline/calendar-card";
+import { SelectedDayCard } from "@/components/timeline/selected-day-card";
+import { TimelineRow } from "@/components/timeline/timeline-row";
 
 const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 const MONTH_NAMES = [
@@ -82,6 +85,7 @@ function buildMonthGrid(
 }
 
 export default function TimelineScreen() {
+  const router = useRouter();
   const { subscriptions, refresh } = useSubscriptions();
   const today = useMemo(() => new Date(), []);
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -107,6 +111,11 @@ export default function TimelineScreen() {
 
   const selectedCell = grid.find((cell) => isSameDay(cell.date, selectedDate));
   const selectedOccurrences = selectedCell?.occurrences ?? [];
+  const selectedTotal = selectedOccurrences.reduce(
+    (sum, o) => sum + o.subscription.amount,
+    0,
+  );
+  const selectedIsToday = isSameDay(selectedDate, today);
 
   const monthOccurrences = grid
     .filter((cell) => cell.inCurrentMonth)
@@ -121,143 +130,112 @@ export default function TimelineScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <ScrollView contentContainerStyle={styles.content}>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.header}>
-            <ThemedText type="subtitle">Timeline</ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              Recurring schedule · Offline safe
-            </ThemedText>
+            <ThemedText style={styles.title}>Timeline</ThemedText>
+            <ThemedText style={styles.subtitle}>Recurring schedule</ThemedText>
           </View>
 
-          <ThemedView type="backgroundElement" style={styles.calendarCard}>
-            <View style={styles.monthRow}>
-              <Pressable onPress={() => goToMonth(-1)} hitSlop={12}>
-                <ThemedText type="default">‹</ThemedText>
-              </Pressable>
-              <ThemedText type="smallBold">
-                {MONTH_NAMES[viewMonth]} {viewYear}
-              </ThemedText>
-              <Pressable onPress={() => goToMonth(1)} hitSlop={12}>
-                <ThemedText type="default">›</ThemedText>
-              </Pressable>
-            </View>
+          <FadeUpGroup step={100}>
+            <CalendarCard
+              monthLabel={`${MONTH_NAMES[viewMonth]} ${viewYear}`}
+              weekdayLabels={WEEKDAY_LABELS}
+              grid={grid}
+              selectedDate={selectedDate}
+              today={today}
+              activeCount={subscriptions.length}
+              onSelect={setSelectedDate}
+              onPrev={() => goToMonth(-1)}
+              onNext={() => goToMonth(1)}
+            />
+          </FadeUpGroup>
 
-            <View style={styles.weekdayRow}>
-              {WEEKDAY_LABELS.map((label, i) => (
-                <ThemedText
-                  key={`${label}-${i}`}
-                  type="small"
-                  themeColor="textSecondary"
-                  style={styles.weekdayLabel}
-                >
-                  {label}
-                </ThemedText>
-              ))}
-            </View>
-
-            <View style={styles.grid}>
-              {grid.map((cell, index) => {
-                const selected = isSameDay(cell.date, selectedDate);
-                const isToday = isSameDay(cell.date, today);
-                return (
-                  <Pressable
-                    key={index}
-                    style={styles.dayCell}
-                    onPress={() => setSelectedDate(cell.date)}
-                  >
-                    <View
-                      style={[
-                        styles.dayNumberWrap,
-                        selected && styles.dayNumberSelected,
-                        !selected && isToday && styles.dayNumberToday,
-                      ]}
-                    >
-                      <ThemedText
-                        type="small"
-                        style={
-                          [
-                            !cell.inCurrentMonth && styles.dayNumberMuted,
-                            selected && styles.dayNumberTextSelected,
-                          ] as any
-                        }
-                      >
-                        {cell.date.getDate()}
-                      </ThemedText>
-                    </View>
-                    <View style={styles.dotsRow}>
-                      {cell.occurrences.slice(0, 3).map((o, i) => (
-                        <View
-                          key={i}
-                          style={[
-                            styles.dot,
-                            {
-                              backgroundColor: colorForName(
-                                o.subscription.name,
-                              ),
-                            },
-                          ]}
-                        />
-                      ))}
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </ThemedView>
-
-          <ThemedView type="backgroundElement" style={styles.selectedCard}>
-            <ThemedText type="small" themeColor="textSecondary">
-              SELECTED ·{" "}
-              {selectedDate.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-              })}
-            </ThemedText>
-            {selectedOccurrences.length === 0 ? (
-              <ThemedText type="default">No renewals on this day</ThemedText>
-            ) : (
-              <ThemedText type="default">
-                {selectedOccurrences.length} renewal
-                {selectedOccurrences.length > 1 ? "s" : ""} due ·{" "}
-                {formatCurrency(
-                  selectedOccurrences.reduce(
-                    (s, o) => s + o.subscription.amount,
-                    0,
-                  ),
-                )}
-              </ThemedText>
-            )}
-          </ThemedView>
+          <FadeUpGroup step={100}>
+            <SelectedDayCard
+              date={selectedDate}
+              occurrences={selectedOccurrences}
+              isToday={selectedIsToday}
+            />
+          </FadeUpGroup>
 
           {selectedOccurrences.length > 0 && (
-            <View style={styles.section}>
-              {selectedOccurrences.map((o) => (
-                <SubscriptionRow
-                  key={o.subscription.id}
-                  subscription={o.subscription}
-                />
-              ))}
-            </View>
-          )}
+            <>
+              <FadeUpGroup step={100}>
+                <View style={styles.sectionHeader}>
+                  <View style={styles.sectionLeft}>
+                    <ThemedText style={styles.sectionTitle}>
+                      Due on {MONTH_NAMES[selectedDate.getMonth()]}{" "}
+                      {selectedDate.getDate()}
+                    </ThemedText>
+                    {selectedIsToday && (
+                      <View style={styles.todayPill}>
+                        <ThemedText style={styles.todayPillText}>
+                          Today
+                        </ThemedText>
+                      </View>
+                    )}
+                  </View>
+                  <ThemedText style={styles.sectionMeta}>
+                    {formatCurrency(selectedTotal)}
+                  </ThemedText>
+                </View>
+              </FadeUpGroup>
 
-          <ThemedText type="smallBold" style={styles.sectionTitle}>
-            Upcoming in {MONTH_NAMES[viewMonth]} · {formatCurrency(monthTotal)}
-          </ThemedText>
-          <View style={styles.section}>
-            {monthOccurrences.length === 0 ? (
-              <ThemedText type="default" themeColor="textSecondary">
-                Nothing renewing this month.
+              <FadeUpGroup step={100}>
+                <View style={styles.list}>
+                  {selectedOccurrences.map((o) => (
+                    <TimelineRow
+                      key={o.subscription.id}
+                      subscription={o.subscription}
+                      date={o.date}
+                    />
+                  ))}
+                </View>
+              </FadeUpGroup>
+            </>
+          )}
+          <FadeUpGroup step={100}>
+            <View style={styles.sectionHeader}>
+              <ThemedText style={styles.sectionTitle}>
+                Upcoming in {MONTH_NAMES[viewMonth]}
               </ThemedText>
-            ) : (
-              monthOccurrences.map((o, i) => (
-                <SubscriptionRow
-                  key={`${o.subscription.id}-${i}`}
-                  subscription={o.subscription}
-                />
-              ))
-            )}
+              <ThemedText style={styles.sectionMeta}>
+                {monthOccurrences.length}{" "}
+                {monthOccurrences.length === 1 ? "renewal" : "renewals"} ·{" "}
+                {formatCurrency(monthTotal)}
+              </ThemedText>
+            </View>
+          </FadeUpGroup>
+
+          <View style={styles.list}>
+            <FadeUpGroup step={100}>
+              {monthOccurrences.length === 0 ? (
+                <ThemedText style={styles.empty}>
+                  Nothing renewing this month.
+                </ThemedText>
+              ) : (
+                monthOccurrences.map((o, i) => (
+                  <TimelineRow
+                    key={`${o.subscription.id}-${i}`}
+                    subscription={o.subscription}
+                    date={o.date}
+                    showDate
+                  />
+                ))
+              )}
+            </FadeUpGroup>
           </View>
         </ScrollView>
+
+        <Pressable
+          style={styles.fab}
+          onPress={() => router.push("/add-subscription")}
+        >
+          <Ionicons name="add" size={30} color="#FFFFFF" />
+        </Pressable>
       </SafeAreaView>
       <BottomTabBar active="timeline" />
     </ThemedView>
@@ -267,48 +245,45 @@ export default function TimelineScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   safeArea: { flex: 1 },
-  content: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.six },
-  header: { paddingVertical: Spacing.three },
-  calendarCard: {
-    borderRadius: Spacing.four,
-    padding: Spacing.three,
-    marginBottom: Spacing.three,
-  },
-  monthRow: {
+  content: { paddingHorizontal: 20, paddingBottom: 120 },
+  header: { paddingTop: 8, marginBottom: 16 },
+  title: { fontSize: 30, fontWeight: "600", paddingTop: 20, color: "#111827" },
+  subtitle: { fontSize: 13, color: "#9CA3AF", marginTop: 2 },
+
+  sectionHeader: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: Spacing.two,
-    paddingHorizontal: Spacing.one,
+    marginTop: 24,
+    marginBottom: 12,
   },
-  weekdayRow: { flexDirection: "row", marginBottom: Spacing.one },
-  weekdayLabel: { flex: 1, textAlign: "center" },
-  grid: { flexDirection: "row", flexWrap: "wrap" },
-  dayCell: {
-    width: `${100 / 7}%`,
-    alignItems: "center",
-    paddingVertical: Spacing.one,
-    gap: 2,
+  sectionLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
+  sectionTitle: { fontSize: 16, fontWeight: "700", color: "#111827" },
+  sectionMeta: { fontSize: 13, color: "#9CA3AF" },
+  todayPill: {
+    backgroundColor: "#FEE2E2",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
   },
-  dayNumberWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+  todayPillText: { fontSize: 11, fontWeight: "700", color: "#DC2626" },
+  list: { gap: 10 },
+  empty: { fontSize: 14, color: "#9CA3AF" },
+
+  fab: {
+    position: "absolute",
+    right: 20,
+    bottom: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#5B21B6",
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: "#5B21B6",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  dayNumberSelected: { backgroundColor: "#4F46E5" },
-  dayNumberToday: { borderWidth: 1, borderColor: "#4F46E5" },
-  dayNumberTextSelected: { color: "#ffffff" },
-  dayNumberMuted: { opacity: 0.35 },
-  dotsRow: { flexDirection: "row", gap: 2, height: 6 },
-  dot: { width: 4, height: 4, borderRadius: 2 },
-  selectedCard: {
-    borderRadius: Spacing.three,
-    padding: Spacing.three,
-    gap: Spacing.one,
-    marginBottom: Spacing.three,
-  },
-  section: { marginBottom: Spacing.four },
-  sectionTitle: { marginBottom: Spacing.two },
 });

@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, justifyContent: "flex-end" },
   backdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(0,0,0,0.2)",
   },
   sheet: {
     backgroundColor: "#FFFFFF",
