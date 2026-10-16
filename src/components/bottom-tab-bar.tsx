@@ -10,7 +10,11 @@ import { Spacing } from "@/constants/theme";
 const ACTIVE_COLOR = "#5B21B6";
 const INACTIVE_COLOR = "#9CA3AF";
 
-export function BottomTabBar({ active }: { active: "vault" | "timeline" }) {
+export function BottomTabBar({
+  active,
+}: {
+  active: "vault" | "timeline" | "insights";
+}) {
   const router = useRouter();
 
   return (
@@ -50,7 +54,7 @@ export function BottomTabBar({ active }: { active: "vault" | "timeline" }) {
             </ThemedText>
           </Pressable>
 
-          {/* <Pressable
+          <Pressable
             style={styles.tab}
             onPress={() => router.replace("/insights")}
           >
@@ -66,7 +70,7 @@ export function BottomTabBar({ active }: { active: "vault" | "timeline" }) {
             >
               Insights
             </ThemedText>
-          </Pressable> */}
+          </Pressable>
         </View>
       </SafeAreaView>
     </ThemedView>

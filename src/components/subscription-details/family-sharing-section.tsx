@@ -199,9 +199,10 @@ const styles = StyleSheet.create({
   emptyTitle: { fontSize: 16, fontWeight: "700", color: "#111827" },
   emptySub: { fontSize: 13, color: "#6B7280", marginTop: 4 },
   emptyButton: {
-    alignSelf: "flex-start",
+    alignSelf: "stretch",
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 6,
     marginTop: 14,
     backgroundColor: "#EDE9FE",
@@ -209,7 +210,11 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     borderRadius: 18,
   },
-  emptyButtonText: { fontSize: 13, fontWeight: "700", color: ACCENT },
+  emptyButtonText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: ACCENT,
+  },
 
   summaryTop: {
     flexDirection: "row",
