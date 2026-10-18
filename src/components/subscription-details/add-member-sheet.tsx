@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, justifyContent: "flex-end" },
   backdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(0,0,0,0.2)",
+    backgroundColor: "rgba(0,0,0,0)",
   },
   sheet: {
     backgroundColor: "#FFFFFF",
@@ -116,6 +116,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: 28,
+    boxShadow: "0px 4px 10px 0px rgba(0, 0, 0, 0.75)",
   },
   handle: {
     alignSelf: "center",

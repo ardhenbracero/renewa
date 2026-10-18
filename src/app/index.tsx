@@ -25,6 +25,14 @@ export default function VaultScreen() {
   const theme = useTheme();
   const activeCount = subscriptions.filter((s) => s.status === "active").length;
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+
+    if (hour >= 5 && hour < 12) return "Good morning";
+    if (hour >= 12 && hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
+
   useFocusEffect(
     useCallback(() => {
       refresh();
@@ -42,7 +50,25 @@ export default function VaultScreen() {
             <FadeUpGroup step={90}>
               <View>
                 <View style={styles.header}>
-                  <ThemedText type="subtitle">Hi, {name || "there"}</ThemedText>
+                  <ThemedText type="subtitle">
+                    {getGreeting()}, {name || "there"}
+                  </ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    Here's what's coming up
+                  </ThemedText>
+
+                  <Pressable
+                    style={{ position: "absolute", right: 0, top: 4 }}
+                    onPress={() => router.push("/settings")}
+                    hitSlop={10}
+                  >
+                    <Ionicons
+                      name="settings-outline"
+                      size={22}
+                      color={theme.textSecondary}
+                    />
+                  </Pressable>
+
                   <ThemedText type="small" themeColor="textSecondary">
                     Here's what's coming up
                   </ThemedText>

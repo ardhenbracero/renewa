@@ -21,7 +21,7 @@ export function PriciestCard({
       onPress={() => router.push(`/subscription-details?id=${sub.id}`)}
     >
       <LinearGradient
-        colors={["#0F172A", "#111827"]}
+        colors={["#4338CA", "#5B21B6", "#3730A3"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.card}
