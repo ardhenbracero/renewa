@@ -1,13 +1,18 @@
 import { ServiceIcon } from "@/components/service-icon";
 import { ThemedText } from "@/components/themed-text";
+import type { ThemeColors } from "@/constants/palette";
 import { daysUntil } from "@/hooks/use-subscriptions";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { formatCurrency } from "@/utils/format";
 import { getUpcomingRenewalDate } from "@db/dateLogic";
 import { router } from "expo-router";
+
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 
 export function RenewingSoonSection({ renewingSoon }: { renewingSoon: any[] }) {
   // TEMPORARY — hardcoded test data, remove once confirmed working
+  //   const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
 
   return (
     <View style={styles.wrapper}>
@@ -79,108 +84,109 @@ export function RenewingSoonSection({ renewingSoon }: { renewingSoon: any[] }) {
   );
 }
 
-const styles = StyleSheet.create({
-  wrapper: { marginBottom: 24 },
-  headerRow: {
-    flexDirection: "row",
-    gap: 15,
-    alignItems: "baseline",
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 12,
-  },
-  row: {
-    gap: 12,
-  },
-  card: {
-    width: 140,
-    height: 140,
-    borderWidth: 1,
-    borderColor: "#00000019",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    padding: 10,
-    justifyContent: "space-between",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 2,
-    marginBottom: 15,
-  },
-  countPill: {
-    backgroundColor: "#FFFCEA",
-    borderWidth: 2,
-    borderColor: "#FFF3CB",
-    borderRadius: 30,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  countPillText: {
-    color: "#111827",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  name: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  amount: {
-    fontSize: 12,
-    color: "#111827",
-  },
-  cost: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  nameCategory: {
-    fontSize: 12,
-    lineHeight: 15,
-    color: "#6B7280",
-  },
-  duePill: {
-    alignSelf: "flex-start",
-    backgroundColor: "#FFFCEA",
-    borderWidth: 2,
-    borderColor: "#FFF3CB",
-    borderRadius: 30,
-    paddingHorizontal: 8,
-    paddingVertical: 1,
-  },
-  duePillUrgent: {
-    backgroundColor: "#FEE2E2",
-    borderColor: "#FECACA",
-  },
-  duePillText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#B45309",
-  },
-  duePillTextUrgent: {
-    color: "#DC2626",
-  },
-  titleRow: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  hr: {
-    borderBottomColor: "#cccccc96",
-    borderBottomWidth: 1,
-  },
-  sectionCount: {
-    color: "#111827",
-    backgroundColor: "#FFFCEA",
-    borderRadius: 30,
-    borderWidth: 2,
-    borderColor: "#FFF3CB",
-    padding: 7,
-    fontSize: 12,
-    fontWeight: "500",
-  },
-});
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    wrapper: { marginBottom: 24 },
+    headerRow: {
+      flexDirection: "row",
+      gap: 15,
+      alignItems: "baseline",
+      marginBottom: 12,
+    },
+    sectionTitle: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: "#111827",
+      marginBottom: 12,
+    },
+    row: {
+      gap: 12,
+    },
+    card: {
+      width: 140,
+      height: 140,
+      borderWidth: 1,
+      borderColor: "#00000019",
+      backgroundColor: "#FFFFFF",
+      borderRadius: 18,
+      padding: 10,
+      justifyContent: "space-between",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.06,
+      shadowRadius: 10,
+      elevation: 2,
+      marginBottom: 15,
+    },
+    countPill: {
+      backgroundColor: "#FFFCEA",
+      borderWidth: 2,
+      borderColor: "#FFF3CB",
+      borderRadius: 30,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+    },
+    countPillText: {
+      color: "#111827",
+      fontSize: 12,
+      fontWeight: "600",
+    },
+    name: {
+      fontSize: 13,
+      fontWeight: "700",
+      color: "#111827",
+    },
+    amount: {
+      fontSize: 12,
+      color: "#111827",
+    },
+    cost: {
+      fontSize: 12,
+      color: "#6B7280",
+    },
+    nameCategory: {
+      fontSize: 12,
+      lineHeight: 15,
+      color: "#6B7280",
+    },
+    duePill: {
+      alignSelf: "flex-start",
+      backgroundColor: "#FFFCEA",
+      borderWidth: 2,
+      borderColor: "#FFF3CB",
+      borderRadius: 30,
+      paddingHorizontal: 8,
+      paddingVertical: 1,
+    },
+    duePillUrgent: {
+      backgroundColor: "#FEE2E2",
+      borderColor: "#FECACA",
+    },
+    duePillText: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: "#B45309",
+    },
+    duePillTextUrgent: {
+      color: "#DC2626",
+    },
+    titleRow: {
+      display: "flex",
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
+    hr: {
+      borderBottomColor: "#cccccc96",
+      borderBottomWidth: 1,
+    },
+    sectionCount: {
+      color: "#111827",
+      backgroundColor: "#FFFCEA",
+      borderRadius: 30,
+      borderWidth: 2,
+      borderColor: "#FFF3CB",
+      padding: 7,
+      fontSize: 12,
+      fontWeight: "500",
+    },
+  });
