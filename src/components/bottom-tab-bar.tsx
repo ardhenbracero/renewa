@@ -13,7 +13,7 @@ const INACTIVE_COLOR = "#9CA3AF";
 export function BottomTabBar({
   active,
 }: {
-  active: "vault" | "timeline" | "insights";
+  active: "vault" | "timeline" | "insights" | "settings";
 }) {
   const router = useRouter();
 
@@ -69,6 +69,24 @@ export function BottomTabBar({
               style={active === "insights" ? styles.activeLabel : undefined}
             >
               Insights
+            </ThemedText>
+          </Pressable>
+
+          <Pressable
+            style={styles.tab}
+            onPress={() => router.replace("/settings")}
+          >
+            <Ionicons
+              name="settings"
+              size={24}
+              color={active === "settings" ? ACTIVE_COLOR : INACTIVE_COLOR}
+            />
+            <ThemedText
+              type="small"
+              themeColor={active === "settings" ? "text" : "textSecondary"}
+              style={active === "settings" ? styles.activeLabel : undefined}
+            >
+              Settings
             </ThemedText>
           </Pressable>
         </View>

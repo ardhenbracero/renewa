@@ -1,10 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-    createContext,
-    ReactNode,
-    useContext,
-    useEffect,
-    useState,
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 
 const NAME_KEY = "profile:name";
@@ -15,6 +15,7 @@ type ProfileContextValue = {
   onboarded: boolean;
   name: string;
   completeOnboarding: (name: string) => Promise<void>;
+  updateName: (name: string) => Promise<void>; // new
 };
 
 const ProfileContext = createContext<ProfileContextValue | null>(null);
@@ -57,9 +58,20 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     setOnboarded(true);
   }
 
+  // inside ProfileProvider, below completeOnboarding:
+  async function updateName(newName: string) {
+    const trimmed = newName.trim();
+    try {
+      await AsyncStorage.setItem(NAME_KEY, trimmed);
+    } catch (e) {
+      console.warn("Failed to save name", e);
+    }
+    setName(trimmed);
+  }
+
   return (
     <ProfileContext.Provider
-      value={{ loaded, onboarded, name, completeOnboarding }}
+      value={{ loaded, onboarded, name, completeOnboarding, updateName }}
     >
       {children}
     </ProfileContext.Provider>

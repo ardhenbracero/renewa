@@ -47,6 +47,7 @@ function RootNavigator() {
             <Stack.Screen name="index" />
             <Stack.Screen name="timeline" />
             <Stack.Screen name="insights" />
+            <Stack.Screen name="settings" />
             <Stack.Screen
               name="add-subscription"
               options={{ presentation: "modal", headerShown: false }}
