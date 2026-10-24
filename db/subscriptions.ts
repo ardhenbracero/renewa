@@ -1,4 +1,5 @@
 import db from "./database";
+import { deleteMembersForSubscription } from "./members";
 import { NewSubscription, Subscription } from "./schema";
 
 // Converts a raw SQLite row (0/1 booleans) into a proper Subscription object
@@ -75,6 +76,7 @@ export function updateSubscription(
 }
 
 export function deleteSubscription(id: number): void {
+  deleteMembersForSubscription(id);
   db.runSync("DELETE FROM subscriptions WHERE id = ?", [id]);
 }
 

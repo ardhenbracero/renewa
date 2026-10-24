@@ -44,9 +44,13 @@ src/
   hooks/                       use-subscriptions, use-members, use-theme, use-themed-styles
   utils/                       date.ts, format.ts, split.ts, insights.ts
 @db/                           database.ts, schema.ts, subscriptions.ts, members.ts, dateLogic.ts
+    settings.tsx               profile card, appearance (Light / Dark / Auto); a bottom tab
+  components/
+    subscription-details/  onboarding/  timeline/  insights/  settings/
+  utils/                       date.ts, format.ts, split.ts, insights.ts, initials.ts
 ```
 
-Routing: `_layout.tsx` wraps everything in `ThemeProvider > ProfileProvider`. `Stack.Protected guard={!onboarded}` shows only `onboarding`; `guard={onboarded}` shows the rest. Tapping a subscription goes to `/subscription-details?id=`; the pencil icon goes to `/add-subscription?id=`. The bottom tab bar (Vault / Timeline / Insights) uses `router.replace`. New screens must be registered in `_layout.tsx` inside the onboarded block.
+Routing: `_layout.tsx` wraps everything in `ThemeProvider > ProfileProvider`. `Stack.Protected guard={!onboarded}` shows only `onboarding`; `guard={onboarded}` shows the rest. Tapping a subscription goes to `/subscription-details?id=`; the pencil icon goes to `/add-subscription?id=`. The bottom tab bar (Vault / Timeline / Insights / Settings) uses `router.replace`. The `active` prop accepts "vault" | "timeline" | "insights" | "settings".
 
 ## Conventions
 
@@ -60,15 +64,17 @@ Routing: `_layout.tsx` wraps everything in `ThemeProvider > ProfileProvider`. `S
 ## Theming (migration in progress)
 
 Light and dark mode use tokens from `constants/palette.ts`, read through `useTheme()` and `useThemedStyles()`. `useTheme()` merges the old `Colors` object with the palette, so old keys like `theme.text` and `themeColor="onAccent"` still work.
+Already themed with tokens: `DetailsCard`, `DetailsSection`, `ToggleRow`, everything in `components/settings/`, and `settings.tsx`.
 
 Component pattern:
 
 ```tsx
-const makeStyles = (c: ThemeColors) => StyleSheet.create({ card: { backgroundColor: c.surface } });
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({ card: { backgroundColor: c.surface } });
 
 export function Thing() {
-  const styles = useThemedStyles(makeStyles);   // first line in the component
-  const theme = useTheme();                      // only for colors used in JSX (icons, placeholders)
+  const styles = useThemedStyles(makeStyles); // first line in the component
+  const theme = useTheme(); // only for colors used in JSX (icons, placeholders)
 }
 ```
 
@@ -76,24 +82,24 @@ Keep `makeStyles` at the bottom of the file, outside the component.
 
 Hex-to-token mapping when converting a file:
 
-| Hardcoded | Token |
-|---|---|
-| `#FFFFFF` card or sheet background | `c.surface` |
-| `#FFFFFF` text/icon on a violet fill | `c.onAccent` |
-| `#111827` | `c.text` |
-| `#374151` `#4B5563` `#6B7280` | `c.textSecondary` |
-| `#9CA3AF` `#D1D5DB` | `c.textTertiary` |
-| `#F3F4F6` (inputs, tracks, chips) | `c.surfaceMuted` |
-| `#E5E7EB` | `c.border` |
-| `#F3F1EC` | `c.surfaceWarm` |
-| `#5B21B6` / `#4338CA` as a fill | `c.accent` |
-| `#5B21B6` / `#4338CA` as text or icon | `c.accentText` |
-| `#EDE9FE` | `c.accentSoft` |
-| amber `#FEF3C7` `#FDE68A` `#B45309` | `c.amberSoft` `c.amberBorder` `c.amberText` |
-| red `#FEE2E2` `#FECACA` `#DC2626` | `c.redSoft` `c.redBorder` `c.redText` |
-| green `#ECFDF5` `#A7F3D0` `#047857` | `c.greenSoft` `c.greenBorder` `c.greenText` |
-| `rgba(0,0,0,0.4)` backdrops | `c.overlay` |
-| card shadows | `c.shadowOpacity`, `c.cardBorder`, `c.cardElevation` (shadows are off in dark; cards get a thin border instead) |
+| Hardcoded                             | Token                                                                                                           |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `#FFFFFF` card or sheet background    | `c.surface`                                                                                                     |
+| `#FFFFFF` text/icon on a violet fill  | `c.onAccent`                                                                                                    |
+| `#111827`                             | `c.text`                                                                                                        |
+| `#374151` `#4B5563` `#6B7280`         | `c.textSecondary`                                                                                               |
+| `#9CA3AF` `#D1D5DB`                   | `c.textTertiary`                                                                                                |
+| `#F3F4F6` (inputs, tracks, chips)     | `c.surfaceMuted`                                                                                                |
+| `#E5E7EB`                             | `c.border`                                                                                                      |
+| `#F3F1EC`                             | `c.surfaceWarm`                                                                                                 |
+| `#5B21B6` / `#4338CA` as a fill       | `c.accent`                                                                                                      |
+| `#5B21B6` / `#4338CA` as text or icon | `c.accentText`                                                                                                  |
+| `#EDE9FE`                             | `c.accentSoft`                                                                                                  |
+| amber `#FEF3C7` `#FDE68A` `#B45309`   | `c.amberSoft` `c.amberBorder` `c.amberText`                                                                     |
+| red `#FEE2E2` `#FECACA` `#DC2626`     | `c.redSoft` `c.redBorder` `c.redText`                                                                           |
+| green `#ECFDF5` `#A7F3D0` `#047857`   | `c.greenSoft` `c.greenBorder` `c.greenText`                                                                     |
+| `rgba(0,0,0,0.4)` backdrops           | `c.overlay`                                                                                                     |
+| card shadows                          | `c.shadowOpacity`, `c.cardBorder`, `c.cardElevation` (shadows are off in dark; cards get a thin border instead) |
 
 Leave alone: violet gradients, brand badge colors, white text on gradients, and the dark "Selected day" card on Timeline.
 
@@ -110,6 +116,7 @@ Brand colors: accent `#5B21B6`, gradient `#4338CA` → `#5B21B6` → `#3730A3`, 
 `members` (snake_case columns): id, subscription_id, name, is_manager, paid, created_at. `members.ts` converts rows to the `Member` type with `toMember`.
 
 Database rules:
+
 - Tables are created in `initDatabase()` with `CREATE TABLE IF NOT EXISTS`. Add columns to existing tables with a migration function that checks `PRAGMA table_info` and then runs `ALTER TABLE` (see `migrateAddIconSlugColumn`). Never drop or recreate tables users already have data in.
 - SQLite stores booleans as 0/1. Convert at the data-layer boundary.
 - Deleting a subscription must also call `deleteMembersForSubscription(id)`, otherwise members are orphaned.
@@ -155,12 +162,15 @@ Database rules:
 - Family Sharing only tracks who owes what. The app never moves money, so avoid words like "payment request" in the UI.
 - Insights "6-Month Outlook" shows **scheduled** charges per month, not history. No payment history is stored.
 - Free trial and auto-pay are independent toggles. The Amount card shows one combined pill: "Trial - auto-renews", "Trial - won't auto-renew", or "Auto-Pay active".
+- Settings has a profile card, not an account screen. There is no email, Renewa ID, or security section, because there are no accounts. The badge reads "Local only", and "Personal Details" opens a sheet to edit the first name (`updateName` in `profile-context.tsx`).
+- Appearance options are labeled Light / Dark / Auto in the UI. "Auto" is stored as `"system"`.
+- The "Your current plan" / "Renewa Plus" section from the Figma Settings design is intentionally NOT built. Selling paid features requires Apple in-app purchases (StoreKit through RevenueCat or expo-iap), an EAS dev build (it can't be tested in Expo Go), and real enforcement of a free-tier limit in the add flow. Do not build it or add upgrade copy without asking.
 
 ## Known issues and TODO
 
 - `addInterval` uses `setMonth(+1)`, so Jan 31 rolls to Mar 3 instead of Feb 28. Fix in `dateLogic.ts` (clamp to the last day of the month).
 - Notifications are not built. The onboarding card says "Timely Pings - Alerts before billing"; build it or change the copy before release.
-- Optional: store a payment record on Renew to turn the Insights outlook into real history; custom per-member split amounts; a Settings field to change the name after onboarding.
+- Optional: store a payment record on Renew to turn the Insights outlook into real history; custom per-member split amounts.
 - Remove leftovers before release: the `// TEMP` `AsyncStorage.multiRemove` line in `profile-context.tsx`, any `DEBUG:` text on screens, and the stale `// TEMPORARY` comment in `RenewingSoonSection.tsx`.
 
 ## Release checklist (App Store)
@@ -172,6 +182,7 @@ Database rules:
 5. `eas submit --platform ios`, then test through TestFlight on a real device.
 6. App Store Connect: screenshots, description, keywords, support URL, privacy policy URL (state that no data is collected), age rating.
 7. Review-rejection risks: placeholder text, broken links, crash on launch, features promised in copy but not built.
+8. Before submitting, re-read all in-app copy and make sure every claim is true (for example "Timely Pings", "Local only", "Offline safe").
 
 ## Working with the developer
 

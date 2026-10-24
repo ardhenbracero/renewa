@@ -10,8 +10,6 @@ import { router } from "expo-router";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 
 export function RenewingSoonSection({ renewingSoon }: { renewingSoon: any[] }) {
-  // TEMPORARY — hardcoded test data, remove once confirmed working
-  //   const theme = useTheme();
   const styles = useThemedStyles(makeStyles);
 
   return (
