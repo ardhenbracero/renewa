@@ -5,7 +5,7 @@ import { SubscriptionRow } from "@/components/subscription-row";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import type { ThemeColors } from "@/constants/palette";
-import { Colors, Spacing } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { useProfile } from "@/context/profile-context";
 import { useSubscriptions } from "@/hooks/use-subscriptions";
 import { useTheme } from "@/hooks/use-theme";
@@ -18,20 +18,14 @@ import { useCallback } from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export function SomeCard() {
-  const styles = useThemedStyles(makeStyles); // first line inside the component
-
-  // return <View style={styles.card} />;
-}
-
 export default function VaultScreen() {
+  const styles = useThemedStyles(makeStyles);
+  const theme = useTheme();
   const router = useRouter();
   const { subscriptions, renewingSoon, monthlyTotal, yearlyTotal, refresh } =
     useSubscriptions();
   const { name } = useProfile();
 
-  const theme = useTheme();
-  const styles = useThemedStyles(makeStyles);
   const activeCount = subscriptions.filter((s) => s.status === "active").length;
 
   const getGreeting = () => {
@@ -97,12 +91,10 @@ export default function VaultScreen() {
                     <ThemedText type="small" themeColor="onAccent">
                       MONTHLY RECURRING
                     </ThemedText>
-                    <View style={styles.activeSubRow}>
-                      <ThemedText
-                        type="smallBold"
-                        style={styles.activeSubscription}
-                      >
-                        <View style={styles.activeDot} /> {activeCount} active
+                    <View style={styles.activePill}>
+                      <View style={styles.activeDot} />
+                      <ThemedText type="smallBold" themeColor="onAccent">
+                        {activeCount} active
                       </ThemedText>
                     </View>
                   </View>
@@ -182,31 +174,28 @@ const makeStyles = (c: ThemeColors) =>
     totalText: {
       fontSize: 36,
       lineHeight: 40,
-      fontWeight: 800,
-      color: Colors.light.onAccent,
+      fontWeight: "800",
+      color: c.onAccent,
     },
     divider: {
       height: StyleSheet.hairlineWidth,
       backgroundColor: "#8888",
       marginVertical: Spacing.two,
     },
-    activeSubRow: {
+    activePill: {
       flexDirection: "row",
       alignItems: "center",
       gap: 6,
+      backgroundColor: "#ffffff4e",
+      borderRadius: 20,
+      paddingVertical: Spacing.one,
+      paddingHorizontal: 10,
     },
     activeDot: {
       width: 8,
       height: 8,
       borderRadius: 4,
       backgroundColor: "#22C55E",
-    },
-    activeSubscription: {
-      backgroundColor: "#ffffff4e",
-      borderRadius: 20,
-      padding: Spacing.one,
-      paddingHorizontal: 10,
-      color: Colors.light.onAccent,
     },
     activeSub: {
       flexDirection: "row",
@@ -230,7 +219,7 @@ const makeStyles = (c: ThemeColors) =>
     soonPrice: { marginTop: Spacing.one },
     separator: {
       height: StyleSheet.hairlineWidth,
-      backgroundColor: "#8888",
+      backgroundColor: c.border,
     },
     empty: { paddingVertical: Spacing.five, alignItems: "center" },
     fab: {
@@ -240,7 +229,7 @@ const makeStyles = (c: ThemeColors) =>
       width: 56,
       height: 56,
       borderRadius: 28,
-      backgroundColor: "#4F46E5",
+      backgroundColor: c.accent,
       alignItems: "center",
       justifyContent: "center",
       shadowColor: "#000",
@@ -249,5 +238,5 @@ const makeStyles = (c: ThemeColors) =>
       shadowOffset: { width: 0, height: 4 },
       elevation: 4,
     },
-    fabPlus: { color: "#ffffff", fontSize: 28, lineHeight: 30 },
+    fabPlus: { color: c.onAccent, fontSize: 28, lineHeight: 30 },
   });

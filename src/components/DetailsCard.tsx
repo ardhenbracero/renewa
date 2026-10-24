@@ -20,20 +20,23 @@ export function DetailsSection({
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
     card: {
+      marginTop: 20,
       marginHorizontal: 20,
-      backgroundColor: "#fff",
+      backgroundColor: c.surface,
       borderRadius: 20,
+      borderWidth: 1,
+      borderColor: c.cardBorder,
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.06,
+      shadowOpacity: c.shadowOpacity,
       shadowRadius: 12,
-      elevation: 2,
+      elevation: c.cardElevation,
     },
     section: {
       paddingHorizontal: 18,
       paddingVertical: 16,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: "#F3F4F6",
+      borderBottomColor: c.divider,
     },
     sectionLast: {
       borderBottomWidth: 0,
