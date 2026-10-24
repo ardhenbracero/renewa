@@ -33,7 +33,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         const saved = await AsyncStorage.getItem(KEY);
         if (saved === "light" || saved === "dark" || saved === "system") {
           setPreferenceState(saved);
-          Appearance.setColorScheme((saved === "system" ? null : saved) as any);
+          Appearance.setColorScheme(saved === "system" ? "unspecified" : saved);
         }
       } catch (e) {
         console.warn("Failed to load theme", e);
@@ -46,7 +46,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setPreference = useCallback((p: ThemePreference) => {
     setPreferenceState(p);
     // Also tells native UI (alerts, keyboard, pickers) which mode to use
-    Appearance.setColorScheme((p === "system" ? null : p) as any);
+    Appearance.setColorScheme(p === "system" ? "unspecified" : p);
     AsyncStorage.setItem(KEY, p).catch((e) =>
       console.warn("Failed to save theme", e),
     );

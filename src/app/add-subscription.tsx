@@ -170,7 +170,7 @@ export default function AddSubscriptionScreen() {
         style: "destructive",
         onPress: () => {
           deleteSubscription(Number(id));
-          router.back();
+          router.dismissTo("/");
         },
       },
     ]);
