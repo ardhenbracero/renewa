@@ -15,7 +15,8 @@ type ProfileContextValue = {
   onboarded: boolean;
   name: string;
   completeOnboarding: (name: string) => Promise<void>;
-  updateName: (name: string) => Promise<void>; // new
+  updateName: (name: string) => Promise<void>;
+  resetOnboarding: () => Promise<void>; // TEMP: testing only, remove before release
 };
 
 const ProfileContext = createContext<ProfileContextValue | null>(null);
@@ -56,7 +57,6 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     setOnboarded(true);
   }
 
-  // inside ProfileProvider, below completeOnboarding:
   async function updateName(newName: string) {
     const trimmed = newName.trim();
     try {
@@ -67,9 +67,23 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     setName(trimmed);
   }
 
+  // TEMP: testing only, remove before release (with the DEBUG button in settings.tsx)
+  async function resetOnboarding() {
+    await AsyncStorage.multiRemove([NAME_KEY, ONBOARDED_KEY]);
+    setName("");
+    setOnboarded(false);
+  }
+
   return (
     <ProfileContext.Provider
-      value={{ loaded, onboarded, name, completeOnboarding, updateName }}
+      value={{
+        loaded,
+        onboarded,
+        name,
+        completeOnboarding,
+        updateName,
+        resetOnboarding,
+      }}
     >
       {children}
     </ProfileContext.Provider>

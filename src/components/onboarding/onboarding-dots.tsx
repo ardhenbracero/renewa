@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
-
-const ACCENT = "#4338CA";
+import type { ThemeColors } from "@/constants/palette";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 
 export function OnboardingDots({
   total,
@@ -9,6 +9,7 @@ export function OnboardingDots({
   total: number;
   active: number;
 }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.row}>
       {Array.from({ length: total }).map((_, i) => (
@@ -18,8 +19,9 @@ export function OnboardingDots({
   );
 }
 
-const styles = StyleSheet.create({
-  row: { flexDirection: "row", alignItems: "center", gap: 6 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#D1D5DB" },
-  dotActive: { width: 28, backgroundColor: ACCENT },
-});
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    row: { flexDirection: "row", alignItems: "center", gap: 6 },
+    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: c.textTertiary },
+    dotActive: { width: 28, backgroundColor: c.accent },
+  });

@@ -5,6 +5,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ScreenHeader } from "@/components/screen-header";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import type { ThemeColors } from "@/constants/palette";
@@ -138,10 +139,11 @@ export default function TimelineScreen() {
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.header}>
-            <ThemedText style={styles.title}>Timeline</ThemedText>
-            <ThemedText style={styles.subtitle}>Recurring schedule</ThemedText>
-          </View>
+          <ScreenHeader
+            title="Timeline"
+            subtitle="Recurring schedule"
+            style={styles.header}
+          />
 
           <FadeUpGroup step={100}>
             <CalendarCard
@@ -251,9 +253,8 @@ const makeStyles = (c: ThemeColors) =>
     container: { flex: 1 },
     safeArea: { flex: 1 },
     content: { paddingHorizontal: 20, paddingBottom: 120 },
-    header: { paddingTop: 8, marginBottom: 16 },
-    title: { fontSize: 30, fontWeight: "600", paddingTop: 20, color: c.text },
-    subtitle: { fontSize: 13, color: c.textTertiary, marginTop: 2 },
+    // No gap on this ScrollView, so match the 16px gap Insights/Settings use
+    header: { marginBottom: 16 },
 
     sectionHeader: {
       flexDirection: "row",

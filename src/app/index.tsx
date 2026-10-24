@@ -1,6 +1,7 @@
 import { BottomTabBar } from "@/components/bottom-tab-bar";
 import { FadeUp, FadeUpGroup } from "@/components/fade-up";
 import { RenewingSoonSection } from "@/components/RenewingSoonSection";
+import { ScreenHeader } from "@/components/screen-header";
 import { SubscriptionRow } from "@/components/subscription-row";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -53,15 +54,14 @@ export default function VaultScreen() {
             <FadeUpGroup step={90}>
               <View>
                 <View style={styles.header}>
-                  <ThemedText type="subtitle">
-                    {getGreeting()}, {name || "there"}
-                  </ThemedText>
-                  <ThemedText type="small" themeColor="textSecondary">
-                    Here's what's coming up
-                  </ThemedText>
+                  <ScreenHeader
+                    title={`${getGreeting()}, ${name || "there"}`}
+                    subtitle="Here's what's coming up"
+                    style={styles.greeting}
+                  />
 
                   <Pressable
-                    style={{ position: "absolute", right: 0, top: 4 }}
+                    style={styles.settingsButton}
                     onPress={() => router.push("/settings")}
                     hitSlop={10}
                   >
@@ -160,10 +160,14 @@ const makeStyles = (c: ThemeColors) =>
       transform: [{ rotate: "-15deg" }],
     },
     listContent: {
-      paddingHorizontal: Spacing.three,
+      paddingHorizontal: 20, // same side margin as Timeline/Insights/Settings
       paddingBottom: Spacing.six,
     },
-    header: { paddingVertical: Spacing.three },
+    // ScreenHeader brings its own top padding; keep 16px below like other pages
+    header: { paddingBottom: Spacing.three },
+    greeting: { paddingRight: 36 }, // room for the settings gear on long names
+    // Centered on the 36px title line, below ScreenHeader's 16px top padding
+    settingsButton: { position: "absolute", right: 0, top: 23 },
     summaryCard: {
       borderRadius: Spacing.four,
       padding: Spacing.four,

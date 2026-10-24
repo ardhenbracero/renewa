@@ -13,11 +13,14 @@ import { NameStep } from "@/components/onboarding/name-step";
 import { OnboardingDots } from "@/components/onboarding/onboarding-dots";
 import { WelcomeStep } from "@/components/onboarding/welcomeStep";
 import { ThemedText } from "@/components/themed-text";
+import type { ThemeColors } from "@/constants/palette";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useProfile } from "@/context/profile-context";
 
-const ACCENT = "#4338CA";
-
 export default function OnboardingScreen() {
+  const styles = useThemedStyles(makeStyles);
+  const theme = useTheme();
   const { completeOnboarding } = useProfile();
   const [step, setStep] = useState<0 | 1>(0);
   const [name, setName] = useState("");
@@ -39,13 +42,13 @@ export default function OnboardingScreen() {
               <OnboardingDots total={2} active={0} />
               <Pressable style={styles.primary} onPress={() => setStep(1)}>
                 <ThemedText style={styles.primaryText}>Get Started</ThemedText>
-                <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+                <Ionicons name="arrow-forward" size={18} color={theme.onAccent} />
               </Pressable>
               <View style={styles.footerRow}>
                 <Ionicons
                   name="lock-closed-outline"
                   size={12}
-                  color="#9CA3AF"
+                  color={theme.textTertiary}
                 />
                 <ThemedText style={styles.footerText}>
                   On-device only · Offline safe · Zero trackers
@@ -61,13 +64,13 @@ export default function OnboardingScreen() {
                 onPress={() => setStep(0)}
                 hitSlop={10}
               >
-                <Ionicons name="arrow-back" size={22} color="#111827" />
+                <Ionicons name="arrow-back" size={22} color={theme.text} />
               </Pressable>
 
               <View style={styles.metaRow}>
                 <OnboardingDots total={2} active={1} />
                 <View style={styles.devicePill}>
-                  <Ionicons name="lock-closed" size={11} color="#4B5563" />
+                  <Ionicons name="lock-closed" size={11} color={theme.textSecondary} />
                   <ThemedText style={styles.devicePillText}>
                     On-device only
                   </ThemedText>
@@ -90,7 +93,7 @@ export default function OnboardingScreen() {
                 onPress={() => completeOnboarding(name)}
               >
                 <ThemedText style={styles.primaryText}>Continue</ThemedText>
-                <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+                <Ionicons name="arrow-forward" size={18} color={theme.onAccent} />
               </Pressable>
               <Pressable onPress={() => completeOnboarding("")} hitSlop={8}>
                 <ThemedText style={styles.skip}>Skip for now</ThemedText>
@@ -103,50 +106,51 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#FAF9F6" },
-  nameWrap: { paddingHorizontal: 20, paddingTop: 8 },
-  back: { width: 32, height: 32, justifyContent: "center" },
-  metaRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 12,
-  },
-  devicePill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: "#F3F1EC",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
-  devicePillText: { fontSize: 11, fontWeight: "600", color: "#4B5563" },
-  bottom: {
-    paddingHorizontal: 20,
-    paddingBottom: 12,
-    gap: 14,
-    alignItems: "center",
-  },
-  primary: {
-    alignSelf: "stretch",
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: ACCENT,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    shadowColor: ACCENT,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  primaryDisabled: { opacity: 0.45 },
-  primaryText: { color: "#FFFFFF", fontSize: 16, fontWeight: "700" },
-  skip: { fontSize: 14, color: "#6B7280" },
-  footerRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  footerText: { fontSize: 11, color: "#9CA3AF" },
-});
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    screen: { flex: 1, backgroundColor: c.background },
+    nameWrap: { paddingHorizontal: 20, paddingTop: 8 },
+    back: { width: 32, height: 32, justifyContent: "center" },
+    metaRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginTop: 12,
+    },
+    devicePill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      backgroundColor: c.surfaceWarm,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: 12,
+    },
+    devicePillText: { fontSize: 11, fontWeight: "600", color: c.textSecondary },
+    bottom: {
+      paddingHorizontal: 20,
+      paddingBottom: 12,
+      gap: 14,
+      alignItems: "center",
+    },
+    primary: {
+      alignSelf: "stretch",
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: c.accent,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      shadowColor: c.accent,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
+      elevation: 4,
+    },
+    primaryDisabled: { opacity: 0.45 },
+    primaryText: { color: c.onAccent, fontSize: 16, fontWeight: "700" },
+    skip: { fontSize: 14, color: c.textSecondary },
+    footerRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+    footerText: { fontSize: 11, color: c.textTertiary },
+  });

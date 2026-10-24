@@ -10,6 +10,7 @@ import { BillingCycles } from "@/components/insights/billing-cycles";
 import { CategoryCard } from "@/components/insights/category-card";
 import { OutlookCard } from "@/components/insights/outlook-card";
 import { PriciestCard } from "@/components/insights/priciest-card";
+import { ScreenHeader } from "@/components/screen-header";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import type { ThemeColors } from "@/constants/palette";
@@ -65,12 +66,7 @@ export default function InsightsScreen() {
           showsVerticalScrollIndicator={false}
         >
           <FadeUpGroup step={90}>
-            <View style={styles.header}>
-              <ThemedText style={styles.title}>Insights</ThemedText>
-              <ThemedText style={styles.subtitle}>
-                Where your money goes
-              </ThemedText>
-            </View>
+            <ScreenHeader title="Insights" subtitle="Where your money goes" />
 
             {isEmpty ? (
               <View style={styles.emptyCard}>
@@ -128,9 +124,6 @@ const makeStyles = (c: ThemeColors) =>
     container: { flex: 1 },
     safeArea: { flex: 1 },
     content: { paddingHorizontal: 20, paddingBottom: 120, gap: 16 },
-    header: { paddingTop: 8 },
-    title: { fontSize: 30, fontWeight: "800", color: c.text },
-    subtitle: { fontSize: 13, color: c.textTertiary, marginTop: 2 },
     sectionTitle: {
       fontSize: 16,
       fontWeight: "700",

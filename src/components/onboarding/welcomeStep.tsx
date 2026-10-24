@@ -11,11 +11,13 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/themed-text";
+import type { ThemeColors } from "@/constants/palette";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { OnboardingHero } from "./onboarding-hero";
 
-const ACCENT = "#4338CA";
-
 function AnimatedBell() {
+  const theme = useTheme();
   const angle = useSharedValue(0);
 
   useEffect(() => {
@@ -45,12 +47,13 @@ function AnimatedBell() {
 
   return (
     <Animated.View style={style}>
-      <Ionicons name="notifications-outline" size={16} color={ACCENT} />
+      <Ionicons name="notifications-outline" size={16} color={theme.accentText} />
     </Animated.View>
   );
 }
 
 function Bar({ target, delay }: { target: number; delay: number }) {
+  const styles = useThemedStyles(makeStyles);
   const height = useSharedValue(3);
 
   useEffect(() => {
@@ -75,6 +78,7 @@ function Bar({ target, delay }: { target: number; delay: number }) {
 }
 
 function AnimatedBars() {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.bars}>
       <Bar target={7} delay={0} />
@@ -92,6 +96,7 @@ function FeatureCard({
   title: string;
   subtitle: string;
 }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.feature}>
       <View style={styles.featureIcon}>{icon}</View>
@@ -104,6 +109,7 @@ function FeatureCard({
 }
 
 export function WelcomeStep() {
+  const styles = useThemedStyles(makeStyles);
   return (
     <ScrollView
       contentContainerStyle={styles.content}
@@ -140,60 +146,61 @@ export function WelcomeStep() {
   );
 }
 
-const styles = StyleSheet.create({
-  content: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 16 },
-  eyebrowRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 22,
-  },
-  eyebrowBar: {
-    width: 6,
-    height: 14,
-    borderRadius: 3,
-    backgroundColor: ACCENT,
-  },
-  eyebrow: { fontSize: 11, fontWeight: "800", letterSpacing: 1, color: ACCENT },
-  headline: {
-    fontSize: 30,
-    fontWeight: "800",
-    lineHeight: 36,
-    letterSpacing: -0.5,
-    color: "#111827",
-    marginTop: 10,
-  },
-  body: { fontSize: 15, lineHeight: 22, color: "#4B5563", marginTop: 10 },
-  featureRow: { flexDirection: "row", gap: 10, marginTop: 10 },
-  feature: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: "#F3F1EC",
-    borderRadius: 14,
-    padding: 12,
-  },
-  featureIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#EEF2FF",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  featureTitle: { fontSize: 13, fontWeight: "700", color: "#111827" },
-  featureSub: { fontSize: 11, lineHeight: 15, color: "#6B7280", marginTop: 1 },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    content: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 16 },
+    eyebrowRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginTop: 22,
+    },
+    eyebrowBar: {
+      width: 6,
+      height: 14,
+      borderRadius: 3,
+      backgroundColor: c.accent,
+    },
+    eyebrow: { fontSize: 11, fontWeight: "800", letterSpacing: 1, color: c.accentText },
+    headline: {
+      fontSize: 30,
+      fontWeight: "800",
+      lineHeight: 36,
+      letterSpacing: -0.5,
+      color: c.text,
+      marginTop: 10,
+    },
+    body: { fontSize: 15, lineHeight: 22, color: c.textSecondary, marginTop: 10 },
+    featureRow: { flexDirection: "row", gap: 10, marginTop: 10 },
+    feature: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      backgroundColor: c.surfaceWarm,
+      borderRadius: 14,
+      padding: 12,
+    },
+    featureIcon: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: c.accentSoft,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    featureTitle: { fontSize: 13, fontWeight: "700", color: c.text },
+    featureSub: { fontSize: 11, lineHeight: 15, color: c.textSecondary, marginTop: 1 },
 
-  bars: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 2.5,
-    height: 16,
-  },
-  bar: {
-    width: 3.5,
-    borderRadius: 2,
-    backgroundColor: ACCENT,
-  },
-});
+    bars: {
+      flexDirection: "row",
+      alignItems: "flex-end",
+      gap: 2.5,
+      height: 16,
+    },
+    bar: {
+      width: 3.5,
+      borderRadius: 2,
+      backgroundColor: c.accentText,
+    },
+  });

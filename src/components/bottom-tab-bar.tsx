@@ -5,16 +5,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import type { ThemeColors } from "@/constants/palette";
 import { Spacing } from "@/constants/theme";
-
-const ACTIVE_COLOR = "#5B21B6";
-const INACTIVE_COLOR = "#9CA3AF";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 
 export function BottomTabBar({
   active,
 }: {
   active: "vault" | "timeline" | "insights" | "settings";
 }) {
+  const styles = useThemedStyles(makeStyles);
+  const theme = useTheme();
   const router = useRouter();
 
   return (
@@ -25,7 +27,7 @@ export function BottomTabBar({
             <Ionicons
               name="home"
               size={24}
-              color={active === "vault" ? ACTIVE_COLOR : INACTIVE_COLOR}
+              color={active === "vault" ? theme.accentText : theme.textTertiary}
             />
             <ThemedText
               type="small"
@@ -43,7 +45,7 @@ export function BottomTabBar({
             <Ionicons
               name="calendar"
               size={24}
-              color={active === "timeline" ? ACTIVE_COLOR : INACTIVE_COLOR}
+              color={active === "timeline" ? theme.accentText : theme.textTertiary}
             />
             <ThemedText
               type="small"
@@ -61,7 +63,7 @@ export function BottomTabBar({
             <Ionicons
               name="stats-chart"
               size={24}
-              color={active === "insights" ? ACTIVE_COLOR : INACTIVE_COLOR}
+              color={active === "insights" ? theme.accentText : theme.textTertiary}
             />
             <ThemedText
               type="small"
@@ -79,7 +81,7 @@ export function BottomTabBar({
             <Ionicons
               name="settings"
               size={24}
-              color={active === "settings" ? ACTIVE_COLOR : INACTIVE_COLOR}
+              color={active === "settings" ? theme.accentText : theme.textTertiary}
             />
             <ThemedText
               type="small"
@@ -95,22 +97,23 @@ export function BottomTabBar({
   );
 }
 
-const styles = StyleSheet.create({
-  wrapper: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "#8884",
-  },
-  row: {
-    flexDirection: "row",
-    paddingTop: Spacing.two,
-  },
-  tab: {
-    flex: 1,
-    alignItems: "center",
-    gap: 2,
-    paddingBottom: Spacing.one,
-  },
-  activeLabel: {
-    fontWeight: "700",
-  },
-});
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    wrapper: {
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: c.border,
+    },
+    row: {
+      flexDirection: "row",
+      paddingTop: Spacing.two,
+    },
+    tab: {
+      flex: 1,
+      alignItems: "center",
+      gap: 2,
+      paddingBottom: Spacing.one,
+    },
+    activeLabel: {
+      fontWeight: "700",
+    },
+  });

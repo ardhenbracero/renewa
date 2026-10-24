@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BottomTabBar } from "@/components/bottom-tab-bar";
@@ -7,6 +7,7 @@ import { FadeUpGroup } from "@/components/fade-up";
 import { AppearanceCard } from "@/components/settings/appearance-card";
 import { EditNameSheet } from "@/components/settings/edit-name-sheet";
 import { ProfileCard } from "@/components/settings/profile-card";
+import { ScreenHeader } from "@/components/screen-header";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import type { ThemeColors } from "@/constants/palette";
@@ -16,7 +17,7 @@ import { useThemedStyles } from "@/hooks/use-themed-styles";
 
 export default function SettingsScreen() {
   const styles = useThemedStyles(makeStyles);
-  const { name, updateName } = useProfile();
+  const { name, updateName, resetOnboarding } = useProfile();
   const { subscriptions } = useSubscriptions();
   const [editVisible, setEditVisible] = useState(false);
 
@@ -28,12 +29,10 @@ export default function SettingsScreen() {
           showsVerticalScrollIndicator={false}
         >
           <FadeUpGroup step={90}>
-            <View style={styles.header}>
-              <ThemedText style={styles.title}>Settings</ThemedText>
-              <ThemedText style={styles.subtitle}>
-                Manage your profile and preferences
-              </ThemedText>
-            </View>
+            <ScreenHeader
+              title="Settings"
+              subtitle="Manage your profile and preferences"
+            />
 
             <ProfileCard
               name={name}
@@ -42,6 +41,13 @@ export default function SettingsScreen() {
             />
 
             <AppearanceCard />
+
+            {/* TEMP: testing only, remove before release */}
+            <Pressable style={styles.debugButton} onPress={resetOnboarding}>
+              <ThemedText style={styles.debugText}>
+                DEBUG: Reset onboarding
+              </ThemedText>
+            </Pressable>
           </FadeUpGroup>
         </ScrollView>
       </SafeAreaView>
@@ -66,7 +72,14 @@ const makeStyles = (c: ThemeColors) =>
     container: { flex: 1 },
     safeArea: { flex: 1 },
     content: { paddingHorizontal: 20, paddingBottom: 40, gap: 16 },
-    header: { paddingTop: 8 },
-    title: { fontSize: 30, fontWeight: "800", color: c.text },
-    subtitle: { fontSize: 13, color: c.textTertiary, marginTop: 2 },
+    // TEMP: testing only, remove before release
+    debugButton: {
+      alignItems: "center",
+      paddingVertical: 12,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: c.redBorder,
+      backgroundColor: c.redSoft,
+    },
+    debugText: { fontSize: 13, fontWeight: "700", color: c.redText },
   });
