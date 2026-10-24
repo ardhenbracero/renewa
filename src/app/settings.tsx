@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BottomTabBar } from "@/components/bottom-tab-bar";
 import { FadeUpGroup } from "@/components/fade-up";
 import { AppearanceCard } from "@/components/settings/appearance-card";
 import { EditNameSheet } from "@/components/settings/edit-name-sheet";
+import { NotificationsCard } from "@/components/settings/notifications-card";
 import { ProfileCard } from "@/components/settings/profile-card";
 import { ScreenHeader } from "@/components/screen-header";
 import { ThemedText } from "@/components/themed-text";
@@ -17,7 +18,7 @@ import { useThemedStyles } from "@/hooks/use-themed-styles";
 
 export default function SettingsScreen() {
   const styles = useThemedStyles(makeStyles);
-  const { name, updateName, resetOnboarding } = useProfile();
+  const { name, updateName } = useProfile();
   const { subscriptions } = useSubscriptions();
   const [editVisible, setEditVisible] = useState(false);
 
@@ -42,12 +43,7 @@ export default function SettingsScreen() {
 
             <AppearanceCard />
 
-            {/* TEMP: testing only, remove before release */}
-            <Pressable style={styles.debugButton} onPress={resetOnboarding}>
-              <ThemedText style={styles.debugText}>
-                DEBUG: Reset onboarding
-              </ThemedText>
-            </Pressable>
+            <NotificationsCard />
           </FadeUpGroup>
         </ScrollView>
       </SafeAreaView>
@@ -72,14 +68,4 @@ const makeStyles = (c: ThemeColors) =>
     container: { flex: 1 },
     safeArea: { flex: 1 },
     content: { paddingHorizontal: 20, paddingBottom: 40, gap: 16 },
-    // TEMP: testing only, remove before release
-    debugButton: {
-      alignItems: "center",
-      paddingVertical: 12,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: c.redBorder,
-      backgroundColor: c.redSoft,
-    },
-    debugText: { fontSize: 13, fontWeight: "700", color: c.redText },
   });

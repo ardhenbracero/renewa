@@ -45,7 +45,9 @@ export function BottomTabBar({
             <Ionicons
               name="calendar"
               size={24}
-              color={active === "timeline" ? theme.accentText : theme.textTertiary}
+              color={
+                active === "timeline" ? theme.accentText : theme.textTertiary
+              }
             />
             <ThemedText
               type="small"
@@ -63,7 +65,9 @@ export function BottomTabBar({
             <Ionicons
               name="stats-chart"
               size={24}
-              color={active === "insights" ? theme.accentText : theme.textTertiary}
+              color={
+                active === "insights" ? theme.accentText : theme.textTertiary
+              }
             />
             <ThemedText
               type="small"
@@ -81,7 +85,9 @@ export function BottomTabBar({
             <Ionicons
               name="settings"
               size={24}
-              color={active === "settings" ? theme.accentText : theme.textTertiary}
+              color={
+                active === "settings" ? theme.accentText : theme.textTertiary
+              }
             />
             <ThemedText
               type="small"

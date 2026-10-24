@@ -27,6 +27,7 @@ import { useAppTheme } from "@/context/theme-context";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { toIsoDate } from "@/utils/date";
+import { syncReminders } from "@/utils/notifications";
 import { BillingCycle, NewSubscription } from "@db/schema";
 import {
   addSubscription,
@@ -34,13 +35,6 @@ import {
   getSubscriptionById,
   updateSubscription,
 } from "@db/subscriptions";
-
-const CYCLES: { value: BillingCycle; label: string }[] = [
-  { value: "weekly", label: "Weekly" },
-  { value: "monthly", label: "Monthly" },
-  { value: "yearly", label: "Yearly" },
-  { value: "custom", label: "Custom" },
-];
 
 const CATEGORIES = [
   "Entertainment",
@@ -82,10 +76,7 @@ export default function AddSubscriptionScreen() {
   const [autoPay, setAutoPay] = useState(true);
   const [notes, setNotes] = useState("");
   const [iconSlug, setIconSlug] = useState<string | null>(null);
-  const QUICK_PICK_LIMIT = 8;
   const [pickerVisible, setPickerVisible] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showPicker, setShowPicker] = useState(false);
 
   useEffect(() => {
     if (isEditing) {
@@ -150,6 +141,7 @@ export default function AddSubscriptionScreen() {
     } else {
       addSubscription(payload);
     }
+    syncReminders();
 
     router.back();
   }
@@ -162,6 +154,7 @@ export default function AddSubscriptionScreen() {
         style: "destructive",
         onPress: () => {
           deleteSubscription(Number(id));
+          syncReminders();
           router.dismissTo("/");
         },
       },

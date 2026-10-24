@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { getUpcomingRenewalDate, toMonthlyAmount } from "@db/dateLogic";
+import { syncReminders } from "@/utils/notifications";
 import { NewSubscription, Subscription } from "@db/schema";
 import {
   addSubscription,
@@ -27,6 +28,7 @@ export function useSubscriptions() {
     const rows = getActiveSubscriptions();
     setSubscriptions(rows);
     setLoading(false);
+    syncReminders(); // keeps reminders in step with the data
   }, []);
 
   useEffect(() => {

@@ -14,6 +14,7 @@ import type { ThemeColors } from "@/constants/palette";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { formatDate, parseIsoDate, toIsoDate } from "@/utils/date";
+import { syncReminders } from "@/utils/notifications";
 import { getNextRenewalAfter, getUpcomingRenewalDate } from "@db/dateLogic";
 import type { Subscription } from "@db/schema";
 import { getSubscriptionById, updateSubscription } from "@db/subscriptions";
@@ -74,6 +75,7 @@ export default function SubscriptionDetailsScreen() {
     if (!sub || renewed) return;
     const next = getNextRenewalAfter(sub);
     updateSubscription(sub.id, { nextRenewalDate: toIsoDate(next) });
+    syncReminders(); // move the reminder to the new date
     resetPaid();
     load();
     setRenewed(true);

@@ -4,8 +4,10 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
+import { AppState } from "react-native";
 
 import { ProfileProvider, useProfile } from "@/context/profile-context";
+import { syncReminders } from "@/utils/notifications";
 import { initDatabase } from "@db/database";
 
 SplashScreen.preventAutoHideAsync();
@@ -26,6 +28,17 @@ function RootNavigator() {
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();
   }, [ready]);
+
+  // Refresh reminders on launch and whenever the app comes back to the
+  // foreground (a reminder may have fired, so the next one needs scheduling)
+  useEffect(() => {
+    if (!ready || !onboarded) return;
+    syncReminders();
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") syncReminders();
+    });
+    return () => sub.remove();
+  }, [ready, onboarded]);
 
   if (!ready) return null;
 

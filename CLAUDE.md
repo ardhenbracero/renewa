@@ -28,26 +28,23 @@ Paths reflect the layout at the time of writing. Confirm aliases in `tsconfig.js
 ```
 src/
   app/                         expo-router screens
-    _layout.tsx                providers + Stack.Protected (onboarding vs main app)
+    _layout.tsx                providers + Stack.Protected (onboarding vs main app), reminder sync on launch/foreground
     index.tsx                  Vault (home)
     timeline.tsx               month calendar + upcoming renewals
     insights.tsx               category donut, priciest, 6-month outlook, billing cycles
-    add-subscription.tsx       modal, create/edit (edit mode via ?id=)
+    add-subscription.tsx       formSheet, create/edit (edit mode via ?id=)
     subscription-details.tsx   details, Renew button, Family Sharing (?id=)
     onboarding.tsx             welcome + name steps
-    settings.tsx               appearance (System / Light / Dark)
-  components/                  shared components
-    subscription-details/  onboarding/  timeline/  insights/
+    settings.tsx               profile card, appearance (Light / Dark / Auto), notifications
+  components/                  shared components (screen-header.tsx = shared page title)
+    subscription-details/  onboarding/  timeline/  insights/  settings/
   constants/                   palette.ts, theme.ts, currencies.ts, categories.ts,
                                service-presets.ts, subscription-relevant-icons.ts, all-brand-icons.ts
   context/                     profile-context.tsx, theme-context.tsx
   hooks/                       use-subscriptions, use-members, use-theme, use-themed-styles
-  utils/                       date.ts, format.ts, split.ts, insights.ts
-@db/                           database.ts, schema.ts, subscriptions.ts, members.ts, dateLogic.ts
-    settings.tsx               profile card, appearance (Light / Dark / Auto); a bottom tab
-  components/
-    subscription-details/  onboarding/  timeline/  insights/  settings/
-  utils/                       date.ts, format.ts, split.ts, insights.ts, initials.ts
+  utils/                       date.ts, format.ts, split.ts, insights.ts, initials.ts, notifications.ts
+db/  (alias @db/, at the project root, not in src/)
+                               database.ts, schema.ts, subscriptions.ts, members.ts, dateLogic.ts
 ```
 
 Routing: `_layout.tsx` wraps everything in `ThemeProvider > ProfileProvider`. `Stack.Protected guard={!onboarded}` shows only `onboarding`; `guard={onboarded}` shows the rest. Tapping a subscription goes to `/subscription-details?id=`; the pencil icon goes to `/add-subscription?id=`. The bottom tab bar (Vault / Timeline / Insights / Settings) uses `router.replace`. The `active` prop accepts "vault" | "timeline" | "insights" | "settings".
@@ -59,12 +56,13 @@ Routing: `_layout.tsx` wraps everything in `ThemeProvider > ProfileProvider`. `S
 - Screens stay mounted in the stack, so reload data with `useFocusEffect(useCallback(() => refresh(), [refresh]))`.
 - Hooks must run before any early return in a component.
 - Validate in the form, not by crashing: `handleSave` already checks name, amount, and date.
+- Top-level page titles (Vault greeting, Timeline, Insights, Settings) use `<ScreenHeader title subtitle />` from `components/screen-header.tsx` so size, weight and spacing match. Page side margin is 20px.
 - Show the file path for every change you propose, and keep edits minimal. Do not remove or rewrite working logic that was not part of the request.
 
-## Theming (migration in progress)
+## Theming
 
 Light and dark mode use tokens from `constants/palette.ts`, read through `useTheme()` and `useThemedStyles()`. `useTheme()` merges the old `Colors` object with the palette, so old keys like `theme.text` and `themeColor="onAccent"` still work.
-Already themed with tokens: `DetailsCard`, `DetailsSection`, `ToggleRow`, everything in `components/settings/`, and `settings.tsx`.
+The migration is complete: every screen and component uses tokens. Hex that remains is intentional (see "Leave alone" below, plus `shadowColor: "#000"`, chart/brand colors in `utils/insights.ts` and `InitialsAvatar`, the green Renew success fill, and the light circle behind brand logos in `service-icon.tsx`).
 
 Component pattern:
 
@@ -105,7 +103,7 @@ Leave alone: violet gradients, brand badge colors, white text on gradients, and 
 
 Also convert: `themeVariant="dark"` on date pickers becomes `themeVariant={scheme}` (from `useAppTheme()`); add `keyboardAppearance={scheme}` on text inputs; placeholder colors use `theme.textTertiary`.
 
-**New code must use tokens, not hex.** Any file still using a static `StyleSheet.create` with hex will stay light in dark mode. When touching such a file, convert it. Conversion order: add/edit form pieces, Details + Family Sharing, Timeline + Insights, Onboarding, then Vault pieces (`RenewingSoonSection`, `AmountCurrencyCard`, `subscription-row`, `bottom-tab-bar`).
+**New code must use tokens, not hex.** Any file still using a static `StyleSheet.create` with hex will stay light in dark mode.
 
 Brand colors: accent `#5B21B6`, gradient `#4338CA` → `#5B21B6` → `#3730A3`, light background `#FAF9F6`.
 
@@ -165,19 +163,27 @@ Database rules:
 - Free trial and auto-pay are independent toggles. The Amount card shows one combined pill: "Trial - auto renew" (trial + auto-pay), "Free Trial" (trial, no auto-pay), or "Auto-Pay active".
 - Settings has a profile card, not an account screen. There is no email, Renewa ID, or security section, because there are no accounts. The badge reads "Local only", and "Personal Details" opens a sheet to edit the first name (`updateName` in `profile-context.tsx`).
 - Appearance options are labeled Light / Dark / Auto in the UI. "Auto" is stored as `"system"`.
+- Notifications are **local reminders only** (`expo-notifications`, no server, no push). One per active subscription at 9:00 AM the day before it renews; trials get "Your X trial ends tomorrow" wording. On by default; iOS asks permission the first time there is something to schedule. Toggle lives in Settings (`settings:reminders` in AsyncStorage). Fixed timing by decision: no per-subscription or time-of-day settings.
 - The "Your current plan" / "Renewa Plus" section from the Figma Settings design is intentionally NOT built. Selling paid features requires Apple in-app purchases (StoreKit through RevenueCat or expo-iap), an EAS dev build (it can't be tested in Expo Go), and real enforcement of a free-tier limit in the add flow. Do not build it or add upgrade copy without asking.
+
+## Notifications (how it works)
+
+- All logic is in `utils/notifications.ts`. `syncReminders()` cancels and rebuilds every scheduled reminder from the database. It queues calls and skips the work when the computed plan is unchanged, so it is cheap to call often.
+- It is called from: `useSubscriptions` refresh, Save/Delete in `add-subscription.tsx`, Renew in `subscription-details.tsx`, and launch/foreground in `_layout.tsx`. **Any new code that changes subscription dates, status or price must call `syncReminders()`.**
+- iOS holds at most 64 pending local notifications, so only the soonest 60 are scheduled.
+- iOS stores date triggers as countdowns, so `getAllScheduledNotificationsAsync` cannot tell you the fire time. Compute it from the plan instead when debugging.
+- Each reminder carries `data.subscriptionId`. Tapping a reminder just opens the app for now.
 
 ## Known issues and TODO
 
-- `addInterval` uses `setMonth(+1)`, so Jan 31 rolls to Mar 3 instead of Feb 28. Fix in `dateLogic.ts` (clamp to the last day of the month).
-- Notifications are not built. The onboarding card says "Timely Pings - Alerts before billing"; build it or change the copy before release.
-- Optional: store a payment record on Renew to turn the Insights outlook into real history; custom per-member split amounts.
-- Remove leftovers before release: the `// TEMP` `AsyncStorage.multiRemove` line in `profile-context.tsx`, any `DEBUG:` text on screens, and the stale `// TEMPORARY` comment in `RenewingSoonSection.tsx`.
+- Renew stores the clamped date, so after Jan 31 -> Feb 28 the next Renew gives Mar 28 (the original day-of-month is lost). Fixing it needs a stored billing-day column (data-model change: ask first).
+- `isTrial` only changes when the user edits it, so a subscription left marked as a trial keeps getting "trial ends" reminders each cycle.
+- Optional: open the subscription's Details when a reminder is tapped; store a payment record on Renew to turn the Insights outlook into real history; custom per-member split amounts; brand logos in the "See all" icon picker are hard to see in dark mode (planned redesign).
 
 ## Release checklist (App Store)
 
-1. `app.json`: name, slug, permanent bundle identifier (e.g. `com.yourname.renewa`), version, `userInterfaceStyle: "automatic"`.
-2. App icon (1024x1024 PNG) and splash screen.
+1. `app.json`: name ("Renewa"), splash colors and `userInterfaceStyle: "automatic"` are done. **Still needed:** a permanent `ios.bundleIdentifier` (e.g. `com.yourname.renewa`), chosen once the Apple Developer account exists.
+2. App icon (1024x1024 PNG) and splash image. `assets/images/icon.png`, `splash-icon.png` and `assets/expo.icon` are still Expo template art.
 3. Apple Developer account ($99/year).
 4. `npx eas-cli login`, `eas build:configure`, then `eas build --platform ios` (preview profile first, production after).
 5. `eas submit --platform ios`, then test through TestFlight on a real device.

@@ -1,16 +1,3 @@
-// import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-
-// export const members = sqliteTable("members", {
-//   id: integer("id").primaryKey({ autoIncrement: true }),
-//   subscriptionId: integer("subscription_id").notNull(),
-//   name: text("name").notNull(),
-//   isManager: integer("is_manager", { mode: "boolean" })
-//     .notNull()
-//     .default(false),
-//   paid: integer("paid", { mode: "boolean" }).notNull().default(false),
-//   createdAt: text("created_at").notNull(),
-// });
-
 export type Member = {
   id: number;
   subscriptionId: number;
