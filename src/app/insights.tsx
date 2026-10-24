@@ -12,6 +12,9 @@ import { OutlookCard } from "@/components/insights/outlook-card";
 import { PriciestCard } from "@/components/insights/priciest-card";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import type { ThemeColors } from "@/constants/palette";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useSubscriptions } from "@/hooks/use-subscriptions";
 import {
     buildCategoryBreakdown,
@@ -22,6 +25,8 @@ import { toMonthlyAmount } from "@db/dateLogic";
 import type { Subscription } from "@db/schema";
 
 export default function InsightsScreen() {
+  const styles = useThemedStyles(makeStyles);
+  const theme = useTheme();
   const router = useRouter();
   const { subscriptions, refresh } = useSubscriptions();
 
@@ -110,7 +115,7 @@ export default function InsightsScreen() {
           style={styles.fab}
           onPress={() => router.push("/add-subscription")}
         >
-          <Ionicons name="add" size={30} color="#FFFFFF" />
+          <Ionicons name="add" size={30} color={theme.onAccent} />
         </Pressable>
       </SafeAreaView>
       <BottomTabBar active="insights" />
@@ -118,46 +123,49 @@ export default function InsightsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  safeArea: { flex: 1 },
-  content: { paddingHorizontal: 20, paddingBottom: 120, gap: 16 },
-  header: { paddingTop: 8 },
-  title: { fontSize: 30, fontWeight: "800", color: "#111827" },
-  subtitle: { fontSize: 13, color: "#9CA3AF", marginTop: 2 },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 12,
-  },
-  emptyCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    padding: 22,
-    alignItems: "center",
-  },
-  emptyTitle: { fontSize: 16, fontWeight: "800", color: "#111827" },
-  emptySub: {
-    fontSize: 13,
-    color: "#6B7280",
-    marginTop: 6,
-    textAlign: "center",
-  },
-  fab: {
-    position: "absolute",
-    right: 20,
-    bottom: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#5B21B6",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#5B21B6",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-});
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    container: { flex: 1 },
+    safeArea: { flex: 1 },
+    content: { paddingHorizontal: 20, paddingBottom: 120, gap: 16 },
+    header: { paddingTop: 8 },
+    title: { fontSize: 30, fontWeight: "800", color: c.text },
+    subtitle: { fontSize: 13, color: c.textTertiary, marginTop: 2 },
+    sectionTitle: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: c.text,
+      marginBottom: 12,
+    },
+    emptyCard: {
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.cardBorder,
+      borderRadius: 24,
+      padding: 22,
+      alignItems: "center",
+    },
+    emptyTitle: { fontSize: 16, fontWeight: "800", color: c.text },
+    emptySub: {
+      fontSize: 13,
+      color: c.textSecondary,
+      marginTop: 6,
+      textAlign: "center",
+    },
+    fab: {
+      position: "absolute",
+      right: 20,
+      bottom: 20,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: c.accent,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: c.accent,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.35,
+      shadowRadius: 12,
+      elevation: 6,
+    },
+  });

@@ -2,10 +2,12 @@ import { StyleSheet, View } from "react-native";
 import Svg, { Circle, G } from "react-native-svg";
 
 import { ThemedText } from "@/components/themed-text";
+import type { ThemeColors } from "@/constants/palette";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { formatCurrency } from "@/utils/format";
 import type { CategorySlice } from "@/utils/insights";
 
-const ACCENT = "#5B21B6";
 const SIZE = 190;
 const STROKE = 22;
 const RADIUS = (SIZE - STROKE) / 2;
@@ -21,6 +23,8 @@ export function CategoryCard({
   total: number;
   categoryCount: number;
 }) {
+  const styles = useThemedStyles(makeStyles);
+  const theme = useTheme();
   let acc = 0;
   const arcs = slices.map((s) => {
     const len = s.percent * CIRC;
@@ -55,7 +59,7 @@ export function CategoryCard({
               cx={SIZE / 2}
               cy={SIZE / 2}
               r={RADIUS}
-              stroke="#F3F4F6"
+              stroke={theme.surfaceMuted}
               strokeWidth={STROKE}
               fill="none"
             />
@@ -104,71 +108,74 @@ export function CategoryCard({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    padding: 18,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 2,
-  },
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  title: { fontSize: 16, fontWeight: "800", color: "#111827" },
-  sub: { fontSize: 12, color: "#9CA3AF", marginTop: 2 },
-  pill: {
-    backgroundColor: "#EDE9FE",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
-  pillText: { fontSize: 11, fontWeight: "700", color: ACCENT },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.cardBorder,
+      borderRadius: 24,
+      padding: 18,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: c.shadowOpacity,
+      shadowRadius: 12,
+      elevation: c.cardElevation,
+    },
+    headerRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+    },
+    title: { fontSize: 16, fontWeight: "800", color: c.text },
+    sub: { fontSize: 12, color: c.textTertiary, marginTop: 2 },
+    pill: {
+      backgroundColor: c.accentSoft,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: 12,
+    },
+    pillText: { fontSize: 11, fontWeight: "700", color: c.accentText },
 
-  donutWrap: {
-    alignSelf: "center",
-    width: SIZE,
-    height: SIZE,
-    marginVertical: 18,
-  },
-  center: {
-    ...StyleSheet.absoluteFill,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  centerLabel: {
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 0.8,
-    color: "#9CA3AF",
-  },
-  centerValue: {
-    fontSize: 26,
-    fontWeight: "800",
-    color: "#111827",
-    marginTop: 2,
-  },
-  centerUnit: { fontSize: 12, color: "#9CA3AF" },
+    donutWrap: {
+      alignSelf: "center",
+      width: SIZE,
+      height: SIZE,
+      marginVertical: 18,
+    },
+    center: {
+      ...StyleSheet.absoluteFill,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    centerLabel: {
+      fontSize: 10,
+      fontWeight: "700",
+      letterSpacing: 0.8,
+      color: c.textTertiary,
+    },
+    centerValue: {
+      fontSize: 26,
+      fontWeight: "800",
+      color: c.text,
+      marginTop: 2,
+    },
+    centerUnit: { fontSize: 12, color: c.textTertiary },
 
-  legend: {
-    gap: 12,
-    paddingTop: 14,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "#E5E7EB",
-  },
-  legendRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  dot: { width: 9, height: 9, borderRadius: 4.5 },
-  legendName: { flex: 1, fontSize: 13, color: "#374151" },
-  legendAmount: { fontSize: 13, fontWeight: "700", color: "#111827" },
-  legendPercent: {
-    width: 48,
-    textAlign: "right",
-    fontSize: 12,
-    color: "#9CA3AF",
-  },
-});
+    legend: {
+      gap: 12,
+      paddingTop: 14,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: c.border,
+    },
+    legendRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+    dot: { width: 9, height: 9, borderRadius: 4.5 },
+    legendName: { flex: 1, fontSize: 13, color: c.textSecondary },
+    legendAmount: { fontSize: 13, fontWeight: "700", color: c.text },
+    legendPercent: {
+      width: 48,
+      textAlign: "right",
+      fontSize: 12,
+      color: c.textTertiary,
+    },
+  });

@@ -2,36 +2,40 @@ import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import type { ThemeColors } from "@/constants/palette";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { formatCurrency } from "@/utils/format";
 import type { BillingCycle } from "@db/schema";
 
+// tint/color name palette tokens so the badges follow light/dark
 const META = {
   monthly: {
     label: "MONTHLY",
     icon: "sync",
-    tint: "#EDE9FE",
-    color: "#5B21B6",
+    tint: "accentSoft",
+    color: "accentText",
     unit: "/ mo",
   },
   yearly: {
     label: "YEARLY",
     icon: "calendar",
-    tint: "#DCFCE7",
-    color: "#15803D",
+    tint: "greenSoft",
+    color: "greenText",
     unit: "/ yr",
   },
   weekly: {
     label: "WEEKLY",
     icon: "time-outline",
-    tint: "#F3F4F6",
-    color: "#6B7280",
+    tint: "surfaceMuted",
+    color: "textSecondary",
     unit: "/ wk",
   },
   custom: {
     label: "CUSTOM",
     icon: "options-outline",
-    tint: "#FEF3C7",
-    color: "#B45309",
+    tint: "amberSoft",
+    color: "amberText",
     unit: "total",
   },
 } as const;
@@ -41,6 +45,8 @@ export function BillingCycles({
 }: {
   summary: Record<BillingCycle, { count: number; sum: number }>;
 }) {
+  const styles = useThemedStyles(makeStyles);
+  const theme = useTheme();
   // Custom only appears once someone actually uses it
   const keys: BillingCycle[] = ["monthly", "yearly", "weekly"];
   if (summary.custom.count > 0) keys.push("custom");
@@ -60,9 +66,9 @@ export function BillingCycles({
             return (
               <View key={key} style={styles.card}>
                 <View
-                  style={[styles.iconBadge, { backgroundColor: meta.tint }]}
+                  style={[styles.iconBadge, { backgroundColor: theme[meta.tint] }]}
                 >
-                  <Ionicons name={meta.icon} size={14} color={meta.color} />
+                  <Ionicons name={meta.icon} size={14} color={theme[meta.color]} />
                 </View>
                 <ThemedText style={styles.label}>{meta.label}</ThemedText>
                 <ThemedText style={styles.count}>{count}</ThemedText>
@@ -80,34 +86,37 @@ export function BillingCycles({
   );
 }
 
-const styles = StyleSheet.create({
-  row: { flexDirection: "row", gap: 10 },
-  card: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    padding: 14,
-    gap: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  iconBadge: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 6,
-  },
-  label: {
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 0.6,
-    color: "#9CA3AF",
-  },
-  count: { fontSize: 24, fontWeight: "800", color: "#111827" },
-  foot: { fontSize: 11, color: "#9CA3AF" },
-});
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    row: { flexDirection: "row", gap: 10 },
+    card: {
+      flex: 1,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.cardBorder,
+      borderRadius: 18,
+      padding: 14,
+      gap: 4,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: c.shadowOpacity,
+      shadowRadius: 10,
+      elevation: c.cardElevation,
+    },
+    iconBadge: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 6,
+    },
+    label: {
+      fontSize: 10,
+      fontWeight: "700",
+      letterSpacing: 0.6,
+      color: c.textTertiary,
+    },
+    count: { fontSize: 24, fontWeight: "800", color: c.text },
+    foot: { fontSize: 11, color: c.textTertiary },
+  });

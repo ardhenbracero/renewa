@@ -4,9 +4,10 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { getBrandHex } from "@/components/brand-icon";
 import { colorForName } from "@/components/InitialsAvatar";
 import { ThemedText } from "@/components/themed-text";
+import type { ThemeColors } from "@/constants/palette";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import type { Subscription } from "@db/schema";
-
-const ACCENT = "#5B21B6";
 
 export type CalendarCell = {
   date: Date;
@@ -50,6 +51,8 @@ export function CalendarCard({
   onPrev: () => void;
   onNext: () => void;
 }) {
+  const styles = useThemedStyles(makeStyles);
+  const theme = useTheme();
   const monthSubs = new Map<number, Subscription>();
   for (const cell of grid) {
     if (!cell.inCurrentMonth) continue;
@@ -75,10 +78,10 @@ export function CalendarCard({
 
         <View style={styles.navRow}>
           <Pressable style={styles.navBtn} onPress={onPrev} hitSlop={8}>
-            <Ionicons name="chevron-back" size={16} color="#6B7280" />
+            <Ionicons name="chevron-back" size={16} color={theme.textSecondary} />
           </Pressable>
           <Pressable style={styles.navBtn} onPress={onNext} hitSlop={8}>
-            <Ionicons name="chevron-forward" size={16} color="#6B7280" />
+            <Ionicons name="chevron-forward" size={16} color={theme.textSecondary} />
           </Pressable>
         </View>
       </View>
@@ -158,93 +161,96 @@ export function CalendarCard({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 2,
-  },
-  monthRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  monthLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
-  monthText: { fontSize: 17, fontWeight: "800", color: "#111827" },
-  activePill: {
-    backgroundColor: "#EDE9FE",
-    paddingHorizontal: 9,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  activePillText: { fontSize: 11, fontWeight: "700", color: ACCENT },
-  navRow: { flexDirection: "row", gap: 8 },
-  navBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "#F3F4F6",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.cardBorder,
+      borderRadius: 24,
+      padding: 16,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: c.shadowOpacity,
+      shadowRadius: 12,
+      elevation: c.cardElevation,
+    },
+    monthRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    monthLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
+    monthText: { fontSize: 17, fontWeight: "800", color: c.text },
+    activePill: {
+      backgroundColor: c.accentSoft,
+      paddingHorizontal: 9,
+      paddingVertical: 3,
+      borderRadius: 10,
+    },
+    activePillText: { fontSize: 11, fontWeight: "700", color: c.accentText },
+    navRow: { flexDirection: "row", gap: 8 },
+    navBtn: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      backgroundColor: c.surfaceMuted,
+      alignItems: "center",
+      justifyContent: "center",
+    },
 
-  weekRow: { flexDirection: "row", marginTop: 16, marginBottom: 6 },
-  weekLabel: {
-    width: "14.2857%",
-    textAlign: "center",
-    fontSize: 12,
-    color: "#9CA3AF",
-  },
+    weekRow: { flexDirection: "row", marginTop: 16, marginBottom: 6 },
+    weekLabel: {
+      width: "14.2857%",
+      textAlign: "center",
+      fontSize: 12,
+      color: c.textTertiary,
+    },
 
-  grid: { flexDirection: "row", flexWrap: "wrap" },
-  cell: {
-    width: "14.2857%",
-    alignItems: "center",
-    paddingVertical: 4,
-  },
-  dayWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  dayToday: { backgroundColor: "#EDE9FE" },
-  daySelected: { backgroundColor: ACCENT },
-  dayText: { fontSize: 14, fontWeight: "500", color: "#111827" },
-  dayMuted: { color: "#D1D5DB" },
-  dayTodayText: { color: ACCENT, fontWeight: "700" },
-  daySelectedText: { color: "#FFFFFF", fontWeight: "700" },
-  dots: { flexDirection: "row", gap: 3, height: 6, marginTop: 3 },
-  dot: { width: 5, height: 5, borderRadius: 2.5 },
+    grid: { flexDirection: "row", flexWrap: "wrap" },
+    cell: {
+      width: "14.2857%",
+      alignItems: "center",
+      paddingVertical: 4,
+    },
+    dayWrap: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    dayToday: { backgroundColor: c.accentSoft },
+    daySelected: { backgroundColor: c.accent },
+    dayText: { fontSize: 14, fontWeight: "500", color: c.text },
+    dayMuted: { color: c.textTertiary },
+    dayTodayText: { color: c.accentText, fontWeight: "700" },
+    daySelectedText: { color: c.onAccent, fontWeight: "700" },
+    dots: { flexDirection: "row", gap: 3, height: 6, marginTop: 3 },
+    dot: { width: 5, height: 5, borderRadius: 2.5 },
 
-  legendRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "#E5E7EB",
-  },
-  legendLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    flexShrink: 1,
-  },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    flexShrink: 1,
-  },
-  legendDot: { width: 7, height: 7, borderRadius: 3.5 },
-  legendText: { fontSize: 11, color: "#6B7280", flexShrink: 1 },
-  marked: { fontSize: 11, color: "#9CA3AF" },
-});
+    legendRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginTop: 12,
+      paddingTop: 12,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: c.border,
+    },
+    legendLeft: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      flexShrink: 1,
+    },
+    legendItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      flexShrink: 1,
+    },
+    legendDot: { width: 7, height: 7, borderRadius: 3.5 },
+    legendText: { fontSize: 11, color: c.textSecondary, flexShrink: 1 },
+    marked: { fontSize: 11, color: c.textTertiary },
+  });

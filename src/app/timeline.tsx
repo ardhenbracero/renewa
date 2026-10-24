@@ -5,9 +5,11 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-// import { SubscriptionRow } from "@/components/subscription-row";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import type { ThemeColors } from "@/constants/palette";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useSubscriptions } from "@/hooks/use-subscriptions";
 import { formatCurrency } from "@/utils/format";
 import { getRenewalOccurrencesInMonth } from "@db/dateLogic";
@@ -85,6 +87,8 @@ function buildMonthGrid(
 }
 
 export default function TimelineScreen() {
+  const styles = useThemedStyles(makeStyles);
+  const theme = useTheme();
   const router = useRouter();
   const { subscriptions, refresh } = useSubscriptions();
   const today = useMemo(() => new Date(), []);
@@ -234,7 +238,7 @@ export default function TimelineScreen() {
           style={styles.fab}
           onPress={() => router.push("/add-subscription")}
         >
-          <Ionicons name="add" size={30} color="#FFFFFF" />
+          <Ionicons name="add" size={30} color={theme.onAccent} />
         </Pressable>
       </SafeAreaView>
       <BottomTabBar active="timeline" />
@@ -242,48 +246,49 @@ export default function TimelineScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  safeArea: { flex: 1 },
-  content: { paddingHorizontal: 20, paddingBottom: 120 },
-  header: { paddingTop: 8, marginBottom: 16 },
-  title: { fontSize: 30, fontWeight: "600", paddingTop: 20, color: "#111827" },
-  subtitle: { fontSize: 13, color: "#9CA3AF", marginTop: 2 },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    container: { flex: 1 },
+    safeArea: { flex: 1 },
+    content: { paddingHorizontal: 20, paddingBottom: 120 },
+    header: { paddingTop: 8, marginBottom: 16 },
+    title: { fontSize: 30, fontWeight: "600", paddingTop: 20, color: c.text },
+    subtitle: { fontSize: 13, color: c.textTertiary, marginTop: 2 },
 
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 24,
-    marginBottom: 12,
-  },
-  sectionLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
-  sectionTitle: { fontSize: 16, fontWeight: "700", color: "#111827" },
-  sectionMeta: { fontSize: 13, color: "#9CA3AF" },
-  todayPill: {
-    backgroundColor: "#FEE2E2",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  todayPillText: { fontSize: 11, fontWeight: "700", color: "#DC2626" },
-  list: { gap: 10 },
-  empty: { fontSize: 14, color: "#9CA3AF" },
+    sectionHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginTop: 24,
+      marginBottom: 12,
+    },
+    sectionLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
+    sectionTitle: { fontSize: 16, fontWeight: "700", color: c.text },
+    sectionMeta: { fontSize: 13, color: c.textTertiary },
+    todayPill: {
+      backgroundColor: c.redSoft,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 10,
+    },
+    todayPillText: { fontSize: 11, fontWeight: "700", color: c.redText },
+    list: { gap: 10 },
+    empty: { fontSize: 14, color: c.textTertiary },
 
-  fab: {
-    position: "absolute",
-    right: 20,
-    bottom: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#5B21B6",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#5B21B6",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-});
+    fab: {
+      position: "absolute",
+      right: 20,
+      bottom: 20,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: c.accent,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: c.accent,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.35,
+      shadowRadius: 12,
+      elevation: 6,
+    },
+  });
