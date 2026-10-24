@@ -1,10 +1,9 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import { useCallback, useMemo } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { BottomTabBar } from "@/components/bottom-tab-bar";
+import { TAB_BAR_SPACE } from "@/components/bottom-tab-bar";
 import { FadeUpGroup } from "@/components/fade-up";
 import { BillingCycles } from "@/components/insights/billing-cycles";
 import { CategoryCard } from "@/components/insights/category-card";
@@ -14,7 +13,6 @@ import { ScreenHeader } from "@/components/screen-header";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import type { ThemeColors } from "@/constants/palette";
-import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useSubscriptions } from "@/hooks/use-subscriptions";
 import {
@@ -27,8 +25,6 @@ import type { Subscription } from "@db/schema";
 
 export default function InsightsScreen() {
   const styles = useThemedStyles(makeStyles);
-  const theme = useTheme();
-  const router = useRouter();
   const { subscriptions, refresh } = useSubscriptions();
 
   useFocusEffect(
@@ -106,15 +102,7 @@ export default function InsightsScreen() {
             )}
           </FadeUpGroup>
         </ScrollView>
-
-        <Pressable
-          style={styles.fab}
-          onPress={() => router.push("/add-subscription")}
-        >
-          <Ionicons name="add" size={30} color={theme.onAccent} />
-        </Pressable>
       </SafeAreaView>
-      <BottomTabBar active="insights" />
     </ThemedView>
   );
 }
@@ -123,7 +111,7 @@ const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
     container: { flex: 1 },
     safeArea: { flex: 1 },
-    content: { paddingHorizontal: 20, paddingBottom: 120, gap: 16 },
+    content: { paddingHorizontal: 20, paddingBottom: TAB_BAR_SPACE, gap: 16 },
     sectionTitle: {
       fontSize: 16,
       fontWeight: "700",
@@ -144,21 +132,5 @@ const makeStyles = (c: ThemeColors) =>
       color: c.textSecondary,
       marginTop: 6,
       textAlign: "center",
-    },
-    fab: {
-      position: "absolute",
-      right: 20,
-      bottom: 20,
-      width: 56,
-      height: 56,
-      borderRadius: 28,
-      backgroundColor: c.accent,
-      alignItems: "center",
-      justifyContent: "center",
-      shadowColor: c.accent,
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.35,
-      shadowRadius: 12,
-      elevation: 6,
     },
   });

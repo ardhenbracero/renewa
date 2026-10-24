@@ -1,4 +1,4 @@
-import { BottomTabBar } from "@/components/bottom-tab-bar";
+import { TAB_BAR_SPACE } from "@/components/bottom-tab-bar";
 import { FadeUp, FadeUpGroup } from "@/components/fade-up";
 import { RenewingSoonSection } from "@/components/RenewingSoonSection";
 import { ScreenHeader } from "@/components/screen-header";
@@ -134,17 +134,7 @@ export default function VaultScreen() {
             </View>
           }
         />
-
-        <Pressable
-          style={styles.fab}
-          onPress={() => router.push("/add-subscription")}
-        >
-          <ThemedText type="title" style={styles.fabPlus}>
-            +
-          </ThemedText>
-        </Pressable>
       </SafeAreaView>
-      <BottomTabBar active="vault" />
     </ThemedView>
   );
 }
@@ -161,7 +151,7 @@ const makeStyles = (c: ThemeColors) =>
     },
     listContent: {
       paddingHorizontal: 20, // same side margin as Timeline/Insights/Settings
-      paddingBottom: Spacing.six,
+      paddingBottom: TAB_BAR_SPACE,
     },
     // ScreenHeader brings its own top padding; keep 16px below like other pages
     header: { paddingBottom: Spacing.three },
@@ -226,21 +216,4 @@ const makeStyles = (c: ThemeColors) =>
       backgroundColor: c.border,
     },
     empty: { paddingVertical: Spacing.five, alignItems: "center" },
-    fab: {
-      position: "absolute",
-      right: Spacing.four,
-      bottom: Spacing.four,
-      width: 56,
-      height: 56,
-      borderRadius: 28,
-      backgroundColor: c.accent,
-      alignItems: "center",
-      justifyContent: "center",
-      shadowColor: "#000",
-      shadowOpacity: 0.2,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 4,
-    },
-    fabPlus: { color: c.onAccent, fontSize: 28, lineHeight: 30 },
   });

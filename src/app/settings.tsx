@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { BottomTabBar } from "@/components/bottom-tab-bar";
+import { TAB_BAR_SPACE } from "@/components/bottom-tab-bar";
 import { FadeUpGroup } from "@/components/fade-up";
 import { AppearanceCard } from "@/components/settings/appearance-card";
 import { EditNameSheet } from "@/components/settings/edit-name-sheet";
@@ -57,8 +57,6 @@ export default function SettingsScreen() {
           setEditVisible(false);
         }}
       />
-
-      <BottomTabBar active="settings" />
     </ThemedView>
   );
 }
@@ -67,5 +65,5 @@ const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
     container: { flex: 1 },
     safeArea: { flex: 1 },
-    content: { paddingHorizontal: 20, paddingBottom: 40, gap: 16 },
+    content: { paddingHorizontal: 20, paddingBottom: TAB_BAR_SPACE, gap: 16 },
   });

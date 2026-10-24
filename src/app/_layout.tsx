@@ -1,3 +1,4 @@
+import { BottomTabBar } from "@/components/bottom-tab-bar";
 import { ThemeProvider, useAppTheme } from "@/context/theme-context";
 import { useTheme } from "@/hooks/use-theme";
 import { Stack } from "expo-router";
@@ -56,10 +57,11 @@ function RootNavigator() {
         </Stack.Protected>
 
         <Stack.Protected guard={onboarded}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="timeline" />
-          <Stack.Screen name="insights" />
-          <Stack.Screen name="settings" />
+          {/* Tabs fade instead of sliding, so only the tab bar indicator moves */}
+          <Stack.Screen name="index" options={{ animation: "fade" }} />
+          <Stack.Screen name="timeline" options={{ animation: "fade" }} />
+          <Stack.Screen name="insights" options={{ animation: "fade" }} />
+          <Stack.Screen name="settings" options={{ animation: "fade" }} />
           <Stack.Screen
             name="add-subscription"
             options={{
@@ -74,6 +76,9 @@ function RootNavigator() {
           <Stack.Screen name="subscription-details" />
         </Stack.Protected>
       </Stack>
+
+      {/* One floating tab bar above all screens; hides itself off the tabs */}
+      {onboarded && <BottomTabBar />}
     </>
   );
 }
