@@ -3,13 +3,16 @@ import { Alert, Pressable, StyleSheet, View } from "react-native";
 
 import { InitialsAvatar } from "@/components/InitialsAvatar";
 import { ThemedText } from "@/components/themed-text";
+import type { ThemeColors } from "@/constants/palette";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { formatCurrency } from "@/utils/format";
 import { computeSplit } from "@/utils/split";
 import type { Member } from "@db/schema";
 
-const ACCENT = "#5B21B6";
-
 function StatusChip({ paid, onPress }: { paid: boolean; onPress: () => void }) {
+  const styles = useThemedStyles(makeStyles);
+  const theme = useTheme();
   return (
     <Pressable
       style={[styles.chip, paid ? styles.chipPaid : styles.chipUnpaid]}
@@ -27,7 +30,7 @@ function StatusChip({ paid, onPress }: { paid: boolean; onPress: () => void }) {
       <Ionicons
         name={paid ? "checkmark" : "time-outline"}
         size={13}
-        color={paid ? "#047857" : "#B45309"}
+        color={paid ? theme.greenText : theme.amberText}
       />
     </Pressable>
   );
@@ -50,6 +53,8 @@ export function FamilySharingSection({
   onRemove: (id: number) => void;
   onReset: () => void;
 }) {
+  const styles = useThemedStyles(makeStyles);
+  const theme = useTheme();
   const split = computeSplit(total, members);
   const progress = total > 0 ? Math.min(split.collected / total, 1) : 0;
 
@@ -91,7 +96,7 @@ export function FamilySharingSection({
             Split the cost and keep track of who has paid you.
           </ThemedText>
           <Pressable style={styles.emptyButton} onPress={onAddPress}>
-            <Ionicons name="person-add-outline" size={16} color={ACCENT} />
+            <Ionicons name="person-add-outline" size={16} color={theme.accentText} />
             <ThemedText style={styles.emptyButtonText}>Add member</ThemedText>
           </Pressable>
         </View>
@@ -167,119 +172,122 @@ export function FamilySharingSection({
   );
 }
 
-const styles = StyleSheet.create({
-  wrapper: { marginTop: 28, marginHorizontal: 20 },
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  label: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-    color: "#9CA3AF",
-  },
-  addLink: { fontSize: 13, fontWeight: "700", color: ACCENT },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    wrapper: { marginTop: 28, marginHorizontal: 20 },
+    headerRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    label: {
+      fontSize: 11,
+      fontWeight: "700",
+      letterSpacing: 0.5,
+      color: c.textTertiary,
+    },
+    addLink: { fontSize: 13, fontWeight: "700", color: c.accentText },
 
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 2,
-  },
-  listCard: { padding: 0, overflow: "hidden" },
+    card: {
+      backgroundColor: c.surface,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: c.cardBorder,
+      padding: 16,
+      marginBottom: 12,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: c.shadowOpacity,
+      shadowRadius: 12,
+      elevation: c.cardElevation,
+    },
+    listCard: { padding: 0, overflow: "hidden" },
 
-  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#111827" },
-  emptySub: { fontSize: 13, color: "#6B7280", marginTop: 4 },
-  emptyButton: {
-    alignSelf: "stretch",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    marginTop: 14,
-    backgroundColor: "#EDE9FE",
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 18,
-  },
-  emptyButtonText: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: ACCENT,
-  },
+    emptyTitle: { fontSize: 16, fontWeight: "700", color: c.text },
+    emptySub: { fontSize: 13, color: c.textSecondary, marginTop: 4 },
+    emptyButton: {
+      alignSelf: "stretch",
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      marginTop: 14,
+      backgroundColor: c.accentSoft,
+      paddingHorizontal: 14,
+      paddingVertical: 9,
+      borderRadius: 18,
+    },
+    emptyButtonText: {
+      fontSize: 15,
+      fontWeight: "700",
+      color: c.accentText,
+    },
 
-  summaryTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  summaryTitle: { fontSize: 17, fontWeight: "800", color: "#111827" },
-  summaryEach: { fontSize: 13, color: "#6B7280" },
-  track: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#E5E7EB",
-    marginTop: 14,
-    overflow: "hidden",
-  },
-  fill: { height: 6, borderRadius: 3, backgroundColor: ACCENT },
-  summaryBottom: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-  paidCount: { fontSize: 12, fontWeight: "700", color: ACCENT },
-  collected: { fontSize: 12, color: "#6B7280" },
+    summaryTop: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    summaryTitle: { fontSize: 17, fontWeight: "800", color: c.text },
+    summaryEach: { fontSize: 13, color: c.textSecondary },
+    track: {
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: c.border,
+      marginTop: 14,
+      overflow: "hidden",
+    },
+    fill: { height: 6, borderRadius: 3, backgroundColor: c.accent },
+    summaryBottom: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginTop: 10,
+    },
+    paidCount: { fontSize: 12, fontWeight: "700", color: c.accentText },
+    collected: { fontSize: 12, color: c.textSecondary },
 
-  memberRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    padding: 14,
-  },
-  memberDivider: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "#F3F4F6",
-  },
-  nameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  memberName: {
-    flexShrink: 1,
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  managerTag: {
-    backgroundColor: "#EDE9FE",
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  managerTagText: { fontSize: 10, fontWeight: "700", color: ACCENT },
-  share: { fontSize: 13, color: "#6B7280", marginTop: 2 },
+    memberRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      padding: 14,
+    },
+    memberDivider: {
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: c.divider,
+    },
+    nameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+    memberName: {
+      flexShrink: 1,
+      fontSize: 15,
+      fontWeight: "700",
+      color: c.text,
+    },
+    managerTag: {
+      backgroundColor: c.accentSoft,
+      paddingHorizontal: 7,
+      paddingVertical: 2,
+      borderRadius: 8,
+    },
+    managerTagText: { fontSize: 10, fontWeight: "700", color: c.accentText },
+    share: { fontSize: 13, color: c.textSecondary, marginTop: 2 },
 
-  chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  chipPaid: { backgroundColor: "#ECFDF5", borderColor: "#A7F3D0" },
-  chipUnpaid: { backgroundColor: "#FFFBEB", borderColor: "#FDE68A" },
-  chipText: { fontSize: 12, fontWeight: "700" },
-  chipTextPaid: { color: "#047857" },
-  chipTextUnpaid: { color: "#B45309" },
+    chip: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      borderRadius: 16,
+      borderWidth: 1,
+    },
+    chipPaid: { backgroundColor: c.greenSoft, borderColor: c.greenBorder },
+    chipUnpaid: { backgroundColor: c.amberSoft, borderColor: c.amberBorder },
+    chipText: { fontSize: 12, fontWeight: "700" },
+    chipTextPaid: { color: c.greenText },
+    chipTextUnpaid: { color: c.amberText },
 
-  resetWrap: { alignSelf: "center", marginTop: 6 },
-  reset: { fontSize: 13, color: "#9CA3AF", textDecorationLine: "underline" },
-});
+    resetWrap: { alignSelf: "center", marginTop: 6 },
+    reset: { fontSize: 13, color: c.textTertiary, textDecorationLine: "underline" },
+  });

@@ -1,5 +1,9 @@
 import { ThemedText } from "@/components/themed-text";
 import { CURRENCIES } from "@/constants/currencies";
+import type { ThemeColors } from "@/constants/palette";
+import { useAppTheme } from "@/context/theme-context";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
@@ -10,8 +14,6 @@ import {
     TextInput,
     View,
 } from "react-native";
-
-const ACCENT = "#5B21B6";
 
 export function AmountCurrencyCard({
   amount,
@@ -28,6 +30,9 @@ export function AmountCurrencyCard({
   autoPay: boolean;
   isTrial: boolean;
 }) {
+  const styles = useThemedStyles(makeStyles);
+  const theme = useTheme();
+  const { scheme } = useAppTheme();
   const [pickerVisible, setPickerVisible] = useState(false);
   const selected =
     CURRENCIES.find((c) => c.code === currencyCode) ?? CURRENCIES[0];
@@ -45,7 +50,7 @@ export function AmountCurrencyCard({
           <ThemedText style={styles.currencyCode}>
             {selected.code} ({selected.symbol})
           </ThemedText>
-          <Ionicons name="chevron-down" size={14} color="#6B7280" />
+          <Ionicons name="chevron-down" size={14} color={theme.textSecondary} />
         </Pressable>
       </View>
 
@@ -55,7 +60,8 @@ export function AmountCurrencyCard({
           <TextInput
             style={styles.amountInput}
             placeholder="0.00"
-            placeholderTextColor="#D1D5DB"
+            placeholderTextColor={theme.textTertiary}
+            keyboardAppearance={scheme}
             keyboardType="decimal-pad"
             value={amount}
             onChangeText={onChangeAmount}
@@ -113,7 +119,11 @@ export function AmountCurrencyCard({
                     {item.code} — {item.label}
                   </ThemedText>
                   {item.code === currencyCode && (
-                    <Ionicons name="checkmark" size={18} color={ACCENT} />
+                    <Ionicons
+                      name="checkmark"
+                      size={18}
+                      color={theme.accentText}
+                    />
                   )}
                 </Pressable>
               )}
@@ -125,123 +135,122 @@ export function AmountCurrencyCard({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    marginHorizontal: 20,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 18,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 2,
-  },
-  topRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  label: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-    color: "#9CA3AF",
-  },
-  currencyButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "#F6F2EE",
-    borderRadius: 30,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  flag: { fontSize: 14 },
-  currencyCode: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#374151",
-  },
-  amountRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-  priceRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  symbol: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: "#111827",
-    marginRight: 2,
-    paddingTop: 15,
-    paddingHorizontal: 5,
-  },
-  amountInput: {
-    fontSize: 44,
-    fontWeight: "800",
-    color: "#111827",
-    padding: 0,
-    minWidth: 80,
-  },
-  pillRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 12,
-  },
-  pill: {
-    alignSelf: "flex-start",
-    backgroundColor: "#EDE9FE",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 20,
-    marginTop: 12,
-  },
-  pillTrial: {
-    backgroundColor: "#DCFCE7", // soft green, distinct from violet auto-pay pill
-  },
-  pillText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: ACCENT,
-  },
-  pillTextTrial: {
-    color: "#15803D", // matching green text
-  },
-  backdrop: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  sheet: {
-    backgroundColor: "white",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingTop: 16,
-    paddingHorizontal: 16,
-    maxHeight: "50%",
-    boxShadow: "0px 4px 10px 0px rgba(0, 0, 0, 0.73)",
-  },
-  sheetTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 12,
-    color: "#111827",
-  },
-  sheetRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#F3F4F6",
-  },
-  sheetRowText: {
-    flex: 1,
-    fontSize: 14,
-    color: "#374151",
-  },
-});
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    card: {
+      marginHorizontal: 20,
+      backgroundColor: c.surface,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: c.cardBorder,
+      padding: 18,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: c.shadowOpacity,
+      shadowRadius: 12,
+      elevation: c.cardElevation,
+    },
+    topRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    label: {
+      fontSize: 11,
+      fontWeight: "700",
+      letterSpacing: 0.5,
+      color: c.textTertiary,
+    },
+    currencyButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      backgroundColor: c.surfaceWarm,
+      borderRadius: 30,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+    },
+    flag: { fontSize: 14 },
+    currencyCode: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: c.textSecondary,
+    },
+    amountRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginTop: 10,
+    },
+    priceRow: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    symbol: {
+      fontSize: 32,
+      fontWeight: "700",
+      color: c.text,
+      marginRight: 2,
+      paddingTop: 15,
+      paddingHorizontal: 5,
+    },
+    amountInput: {
+      fontSize: 44,
+      fontWeight: "800",
+      color: c.text,
+      padding: 0,
+      minWidth: 80,
+    },
+    pill: {
+      alignSelf: "flex-start",
+      backgroundColor: c.accentSoft,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 20,
+      marginTop: 12,
+    },
+    pillTrial: {
+      backgroundColor: c.greenSoft, // distinct from violet auto-pay pill
+    },
+    pillText: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: c.accentText,
+    },
+    pillTextTrial: {
+      color: c.greenText,
+    },
+    backdrop: {
+      flex: 1,
+      justifyContent: "flex-end",
+    },
+    sheet: {
+      backgroundColor: c.surface,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      borderWidth: 1,
+      borderColor: c.cardBorder,
+      paddingTop: 16,
+      paddingHorizontal: 16,
+      maxHeight: "50%",
+      boxShadow: "0px 4px 10px 0px rgba(0, 0, 0, 0.73)",
+    },
+    sheetTitle: {
+      fontSize: 16,
+      fontWeight: "700",
+      marginBottom: 12,
+      color: c.text,
+    },
+    sheetRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      paddingVertical: 12,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: c.divider,
+    },
+    sheetRowText: {
+      flex: 1,
+      fontSize: 14,
+      color: c.textSecondary,
+    },
+  });

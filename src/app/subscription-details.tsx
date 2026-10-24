@@ -10,6 +10,9 @@ import { DetailsHero } from "@/components/subscription-details/details-hero";
 import { RenewButton } from "@/components/subscription-details/renew-button";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import type { ThemeColors } from "@/constants/palette";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { formatDate, parseIsoDate, toIsoDate } from "@/utils/date";
 import { getNextRenewalAfter, getUpcomingRenewalDate } from "@db/dateLogic";
 import type { Subscription } from "@db/schema";
@@ -34,6 +37,7 @@ function cycleLabel(sub: Subscription) {
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.infoRow}>
       <ThemedText style={styles.infoLabel}>{label}</ThemedText>
@@ -45,6 +49,8 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 export default function SubscriptionDetailsScreen() {
+  const styles = useThemedStyles(makeStyles);
+  const theme = useTheme();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const subId = Number(id);
@@ -56,13 +62,6 @@ export default function SubscriptionDetailsScreen() {
   const load = useCallback(() => {
     setSub(getSubscriptionById(subId) ?? null);
   }, [subId]);
-
-  // Reload whenever the screen is focused (e.g. coming back from Edit)
-  useFocusEffect(
-    useCallback(() => {
-      load();
-    }, [load]),
-  );
 
   useEffect(
     () => () => {
@@ -81,7 +80,6 @@ export default function SubscriptionDetailsScreen() {
     timer.current = setTimeout(() => setRenewed(false), 1800);
   }
 
-  // inside the component, below the existing useState lines:
   const { name: profileName } = useProfile();
   const {
     members,
@@ -93,16 +91,14 @@ export default function SubscriptionDetailsScreen() {
   } = useMembers(subId, profileName);
   const [sheetVisible, setSheetVisible] = useState(false);
 
-  // reload both when the screen gains focus:
+  // Reload subscription and members whenever the screen is focused
+  // (e.g. coming back from Edit)
   useFocusEffect(
     useCallback(() => {
       load();
       refreshMembers();
     }, [load, refreshMembers]),
   );
-
-  // in handleRenew, after updateSubscription(...):
-  // resetPaid();
 
   return (
     <ThemedView style={styles.container}>
@@ -113,7 +109,7 @@ export default function SubscriptionDetailsScreen() {
             onPress={() => router.back()}
             hitSlop={8}
           >
-            <Ionicons name="chevron-back" size={24} color="#111827" />
+            <Ionicons name="chevron-back" size={24} color={theme.text} />
           </Pressable>
 
           <ThemedText style={styles.headerTitle}>Details</ThemedText>
@@ -123,7 +119,7 @@ export default function SubscriptionDetailsScreen() {
             onPress={() => sub && router.push(`/add-subscription?id=${sub.id}`)}
             hitSlop={8}
           >
-            <Ionicons name="create-outline" size={22} color="#111827" />
+            <Ionicons name="create-outline" size={22} color={theme.text} />
           </Pressable>
         </View>
 
@@ -200,36 +196,37 @@ export default function SubscriptionDetailsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: {
-    height: 48,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-  },
-  headerBtn: { width: 40, height: 40, justifyContent: "center" },
-  headerTitle: { fontSize: 17, fontWeight: "700", color: "#111827" },
-  content: { paddingBottom: 40 },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 16,
-  },
-  infoLabel: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-    color: "#9CA3AF",
-  },
-  infoValue: {
-    flexShrink: 1,
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#111827",
-  },
-  empty: { flex: 1, alignItems: "center", justifyContent: "center" },
-  emptyText: { color: "#6B7280" },
-});
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    container: { flex: 1 },
+    header: {
+      height: 48,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 20,
+    },
+    headerBtn: { width: 40, height: 40, justifyContent: "center" },
+    headerTitle: { fontSize: 17, fontWeight: "700", color: c.text },
+    content: { paddingBottom: 40 },
+    infoRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 16,
+    },
+    infoLabel: {
+      fontSize: 11,
+      fontWeight: "700",
+      letterSpacing: 0.5,
+      color: c.textTertiary,
+    },
+    infoValue: {
+      flexShrink: 1,
+      fontSize: 15,
+      fontWeight: "600",
+      color: c.text,
+    },
+    empty: { flex: 1, alignItems: "center", justifyContent: "center" },
+    emptyText: { color: c.textSecondary },
+  });

@@ -5,6 +5,10 @@ import {
     BrandIconEntry,
     CURATED_BRAND_ICONS,
 } from "@/constants/all-brand-icons";
+import type { ThemeColors } from "@/constants/palette";
+import { useAppTheme } from "@/context/theme-context";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { useMemo, useState } from "react";
 import {
     FlatList,
@@ -24,6 +28,9 @@ export function BrandIconPickerModal({
   onClose: () => void;
   onSelect: (entry: BrandIconEntry) => void;
 }) {
+  const styles = useThemedStyles(makeStyles);
+  const theme = useTheme();
+  const { scheme } = useAppTheme();
   const [query, setQuery] = useState("");
   const [searchAll, setSearchAll] = useState(false);
 
@@ -66,6 +73,8 @@ export function BrandIconPickerModal({
         <TextInput
           style={styles.search}
           placeholder="Search brands..."
+          placeholderTextColor={theme.textTertiary}
+          keyboardAppearance={scheme}
           value={query}
           onChangeText={handleQueryChange}
           autoFocus
@@ -120,37 +129,44 @@ export function BrandIconPickerModal({
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 60, paddingHorizontal: 16 },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  search: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-  },
-  gridItem: {
-    width: "25%",
-    alignItems: "center",
-    paddingVertical: 12,
-    gap: 4,
-  },
-  gridLabel: { fontSize: 11, textAlign: "center" },
-  emptyState: {
-    alignItems: "center",
-    paddingTop: 40,
-  },
-  searchAllButton: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-  },
-});
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingTop: 60,
+      paddingHorizontal: 16,
+      backgroundColor: c.background,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 12,
+    },
+    search: {
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 8,
+      padding: 12,
+      color: c.text,
+      marginBottom: 16,
+    },
+    gridItem: {
+      width: "25%",
+      alignItems: "center",
+      paddingVertical: 12,
+      gap: 4,
+    },
+    gridLabel: { fontSize: 11, textAlign: "center" },
+    emptyState: {
+      alignItems: "center",
+      paddingTop: 40,
+    },
+    searchAllButton: {
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 8,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+    },
+  });

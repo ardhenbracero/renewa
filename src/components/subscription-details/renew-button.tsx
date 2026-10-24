@@ -2,8 +2,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import type { ThemeColors } from "@/constants/palette";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 
-const ACCENT = "#5B21B6";
+// Solid green fill for the "Renewed" state. No palette token fits: greenText
+// is a light mint in dark mode and would be unreadable under white text.
 const SUCCESS = "#059669";
 
 export function RenewButton({
@@ -15,6 +19,9 @@ export function RenewButton({
   renewed: boolean;
   onPress: () => void;
 }) {
+  const styles = useThemedStyles(makeStyles);
+  const theme = useTheme();
+
   return (
     <View style={styles.wrapper}>
       <Pressable
@@ -25,7 +32,7 @@ export function RenewButton({
         <Ionicons
           name={renewed ? "checkmark-circle" : "refresh"}
           size={20}
-          color="#FFFFFF"
+          color={theme.onAccent}
         />
         <ThemedText style={styles.label}>
           {renewed ? "Renewed" : "Renew"}
@@ -46,30 +53,31 @@ export function RenewButton({
   );
 }
 
-const styles = StyleSheet.create({
-  wrapper: {
-    marginTop: 20,
-    marginHorizontal: 20,
-    alignItems: "center",
-    gap: 10,
-  },
-  button: {
-    alignSelf: "stretch",
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: ACCENT,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    shadowColor: ACCENT,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  buttonSuccess: { backgroundColor: SUCCESS, shadowColor: SUCCESS },
-  label: { color: "#FFFFFF", fontSize: 16, fontWeight: "700" },
-  helper: { fontSize: 13, color: "#9CA3AF" },
-  helperDate: { fontSize: 13, fontWeight: "700", color: "#111827" },
-});
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    wrapper: {
+      marginTop: 20,
+      marginHorizontal: 20,
+      alignItems: "center",
+      gap: 10,
+    },
+    button: {
+      alignSelf: "stretch",
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: c.accent,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      shadowColor: c.accent,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
+      elevation: 4,
+    },
+    buttonSuccess: { backgroundColor: SUCCESS, shadowColor: SUCCESS },
+    label: { color: c.onAccent, fontSize: 16, fontWeight: "700" },
+    helper: { fontSize: 13, color: c.textTertiary },
+    helperDate: { fontSize: 13, fontWeight: "700", color: c.text },
+  });

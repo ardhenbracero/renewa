@@ -38,23 +38,28 @@ function RootNavigator() {
           contentStyle: { backgroundColor: theme.background },
         }}
       >
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Protected guard={!onboarded}>
-            <Stack.Screen name="onboarding" />
-          </Stack.Protected>
+        <Stack.Protected guard={!onboarded}>
+          <Stack.Screen name="onboarding" />
+        </Stack.Protected>
 
-          <Stack.Protected guard={onboarded}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="timeline" />
-            <Stack.Screen name="insights" />
-            <Stack.Screen name="settings" />
-            <Stack.Screen
-              name="add-subscription"
-              options={{ presentation: "modal", headerShown: false }}
-            />
-            <Stack.Screen name="subscription-details" />
-          </Stack.Protected>
-        </Stack>
+        <Stack.Protected guard={onboarded}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="timeline" />
+          <Stack.Screen name="insights" />
+          <Stack.Screen name="settings" />
+          <Stack.Screen
+            name="add-subscription"
+            options={{
+              // Opens at half height; drag up for full screen, down to close
+              presentation: "formSheet",
+              sheetAllowedDetents: [0.8, 1],
+              sheetInitialDetentIndex: 0,
+              sheetGrabberVisible: true,
+              sheetCornerRadius: 24,
+            }}
+          />
+          <Stack.Screen name="subscription-details" />
+        </Stack.Protected>
       </Stack>
     </>
   );

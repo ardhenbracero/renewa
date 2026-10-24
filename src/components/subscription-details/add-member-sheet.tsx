@@ -11,10 +11,12 @@ import {
 
 import { InitialsAvatar } from "@/components/InitialsAvatar";
 import { ThemedText } from "@/components/themed-text";
+import type { ThemeColors } from "@/constants/palette";
+import { useAppTheme } from "@/context/theme-context";
+import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { formatCurrency } from "@/utils/format";
 import { previewEach } from "@/utils/split";
-
-const ACCENT = "#5B21B6";
 
 export function AddMemberSheet({
   visible,
@@ -31,6 +33,9 @@ export function AddMemberSheet({
   currency: string;
   existingCount: number;
 }) {
+  const styles = useThemedStyles(makeStyles);
+  const theme = useTheme();
+  const { scheme } = useAppTheme();
   const [name, setName] = useState("");
 
   useEffect(() => {
@@ -70,7 +75,8 @@ export function AddMemberSheet({
               value={name}
               onChangeText={setName}
               placeholder="Member's name"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={theme.textTertiary}
+              keyboardAppearance={scheme}
               autoFocus
               autoCapitalize="words"
               autoCorrect={false}
@@ -103,65 +109,68 @@ export function AddMemberSheet({
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, justifyContent: "flex-end" },
-  backdrop: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(0,0,0,0)",
-  },
-  sheet: {
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 28,
-    boxShadow: "0px 4px 10px 0px rgba(0, 0, 0, 0.75)",
-  },
-  handle: {
-    alignSelf: "center",
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#E5E7EB",
-    marginBottom: 14,
-  },
-  title: { fontSize: 20, fontWeight: "800", color: "#111827" },
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginTop: 18,
-    backgroundColor: "#F3F4F6",
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    height: 56,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#111827",
-    padding: 0,
-  },
-  preview: {
-    marginTop: 12,
-    backgroundColor: "#EDE9FE",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  previewText: { fontSize: 13, fontWeight: "600", color: ACCENT },
-  button: {
-    marginTop: 18,
-    height: 54,
-    borderRadius: 27,
-    backgroundColor: ACCENT,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonDisabled: { opacity: 0.45 },
-  buttonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "700" },
-  cancelWrap: { alignSelf: "center", marginTop: 14 },
-  cancel: { fontSize: 14, color: "#6B7280" },
-});
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    root: { flex: 1, justifyContent: "flex-end" },
+    backdrop: {
+      ...StyleSheet.absoluteFill,
+      backgroundColor: "rgba(0,0,0,0)",
+    },
+    sheet: {
+      backgroundColor: c.surface,
+      borderTopLeftRadius: 28,
+      borderTopRightRadius: 28,
+      paddingHorizontal: 20,
+      paddingTop: 10,
+      paddingBottom: 28,
+      borderWidth: 1,
+      borderColor: c.cardBorder,
+      boxShadow: "0px 4px 10px 0px rgba(0, 0, 0, 0.75)",
+    },
+    handle: {
+      alignSelf: "center",
+      width: 40,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: c.border,
+      marginBottom: 14,
+    },
+    title: { fontSize: 20, fontWeight: "800", color: c.text },
+    inputRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      marginTop: 18,
+      backgroundColor: c.surfaceMuted,
+      borderRadius: 16,
+      paddingHorizontal: 14,
+      height: 56,
+    },
+    input: {
+      flex: 1,
+      fontSize: 16,
+      fontWeight: "600",
+      color: c.text,
+      padding: 0,
+    },
+    preview: {
+      marginTop: 12,
+      backgroundColor: c.accentSoft,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+    },
+    previewText: { fontSize: 13, fontWeight: "600", color: c.accentText },
+    button: {
+      marginTop: 18,
+      height: 54,
+      borderRadius: 27,
+      backgroundColor: c.accent,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    buttonDisabled: { opacity: 0.45 },
+    buttonText: { color: c.onAccent, fontSize: 16, fontWeight: "700" },
+    cancelWrap: { alignSelf: "center", marginTop: 14 },
+    cancel: { fontSize: 14, color: c.textSecondary },
+  });

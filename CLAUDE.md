@@ -149,7 +149,8 @@ Database rules:
 - `borderRadius`, `borderWidth`, and `padding` on a `Text` are unreliable. Build pills as a `View` (box styling) containing a `Text` (font styling).
 - `fontWeight` must be a string (`"600"`), not a number.
 - Date picker: use `display="default"` on iOS (the `spinner` and `inline` styles rendered badly). `onChange` logs a deprecation warning in v9+; it still works.
-- Wrap screens with a text input in `KeyboardAvoidingView` (`behavior="padding"` on iOS) and set `keyboardShouldPersistTaps="handled"` on scroll views.
+- Wrap screens with a text input in `KeyboardAvoidingView` (`behavior="padding"` on iOS) and set `keyboardShouldPersistTaps="handled"` on scroll views. **Exception: `formSheet` screens** (e.g. `add-subscription`). `KeyboardAvoidingView` mis-measures inside a native sheet and the content renders blank. Make a `ScrollView` the root and use `automaticallyAdjustKeyboardInsets` instead.
+- In `_layout.tsx`, `Stack.Screen` and `Stack.Protected` must be **direct children** of the one `<Stack>`. expo-router silently ignores any other child (a nested `<Stack>` once caused every screen option and both onboarding guards to be skipped).
 - `FadeUp` / `FadeUpGroup` (`components/fade-up.tsx`): wrap a **column of sections**, never a whole screen container (it collapses layout and kills the stagger). Wrap an entire row as one child, not its pieces. List rows beyond the first few should use `delay={0}`.
 - A function called in a component body (instead of inside a handler) causes "Too many re-renders". Check for `onPress={fn()}` and stray setters during render.
 - Expo Go limits: native modules not bundled in Expo Go will fail and need an EAS dev build. Face ID is unsupported in Expo Go on iOS (and is out of scope for this app).
@@ -161,7 +162,7 @@ Database rules:
 - No cloud sync, backend, analytics, or trackers. Privacy copy says "on-device only". Do not claim "encrypted"; the app does not do its own encryption.
 - Family Sharing only tracks who owes what. The app never moves money, so avoid words like "payment request" in the UI.
 - Insights "6-Month Outlook" shows **scheduled** charges per month, not history. No payment history is stored.
-- Free trial and auto-pay are independent toggles. The Amount card shows one combined pill: "Trial - auto-renews", "Trial - won't auto-renew", or "Auto-Pay active".
+- Free trial and auto-pay are independent toggles. The Amount card shows one combined pill: "Trial - auto renew" (trial + auto-pay), "Free Trial" (trial, no auto-pay), or "Auto-Pay active".
 - Settings has a profile card, not an account screen. There is no email, Renewa ID, or security section, because there are no accounts. The badge reads "Local only", and "Personal Details" opens a sheet to edit the first name (`updateName` in `profile-context.tsx`).
 - Appearance options are labeled Light / Dark / Auto in the UI. "Auto" is stored as `"system"`.
 - The "Your current plan" / "Renewa Plus" section from the Figma Settings design is intentionally NOT built. Selling paid features requires Apple in-app purchases (StoreKit through RevenueCat or expo-iap), an EAS dev build (it can't be tested in Expo Go), and real enforcement of a free-tier limit in the add flow. Do not build it or add upgrade copy without asking.

@@ -2,8 +2,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Alert,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -22,10 +20,13 @@ import { NotesSection } from "@/components/NotesSection";
 import { QuickPickSection } from "@/components/QuickPickSection";
 import { ServicePlanNameSection } from "@/components/ServicePlanNameSection";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
 import { ToggleRow } from "@/components/ToggleRow";
+import type { ThemeColors } from "@/constants/palette";
 import { Spacing } from "@/constants/theme";
+import { useAppTheme } from "@/context/theme-context";
 import { useTheme } from "@/hooks/use-theme";
+import { useThemedStyles } from "@/hooks/use-themed-styles";
+import { toIsoDate } from "@/utils/date";
 import { BillingCycle, NewSubscription } from "@db/schema";
 import {
   addSubscription,
@@ -52,8 +53,9 @@ const CATEGORIES = [
   "Other",
 ];
 
+// Local date, not UTC (toISOString would give yesterday before 8am in UTC+8)
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return toIsoDate(new Date());
 }
 
 function isValidIsoDate(value: string): boolean {
@@ -61,8 +63,10 @@ function isValidIsoDate(value: string): boolean {
 }
 
 export default function AddSubscriptionScreen() {
-  const router = useRouter();
+  const styles = useThemedStyles(makeStyles);
   const theme = useTheme();
+  const { scheme } = useAppTheme();
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditing = !!id;
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
@@ -150,18 +154,6 @@ export default function AddSubscriptionScreen() {
     router.back();
   }
 
-  function parseIsoDate(iso: string): Date {
-    const [year, month, day] = iso.split("-").map(Number);
-    return new Date(year, (month || 1) - 1, day || 1);
-  }
-
-  function toIsoDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
-
   function handleDelete() {
     Alert.alert("Delete subscription?", "This can't be undone.", [
       { text: "Cancel", style: "cancel" },
@@ -177,130 +169,135 @@ export default function AddSubscriptionScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+    // ScrollView is the root so the form sheet can size and expand it.
+    // automaticallyAdjustKeyboardInsets keeps inputs above the keyboard
+    // (KeyboardAvoidingView mis-measures inside a sheet).
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets
     >
-      <ThemedView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.content}>
-          <AddSubscriptionHeader onClose={() => router.back()} />
+      <AddSubscriptionHeader
+        isEditing={isEditing}
+        onClose={() => router.back()}
+      />
 
-          <QuickPickSection
-            selectedSlug={selectedPreset}
-            onSelect={(slug, name, category) => {
-              setSelectedPreset(slug);
-              setIconSlug(slug);
-              setName(name);
-              setCategory(category);
-            }}
-            onSeeMore={() => setPickerVisible(true)}
+      <QuickPickSection
+        selectedSlug={selectedPreset}
+        onSelect={(slug, name, category) => {
+          setSelectedPreset(slug);
+          setIconSlug(slug);
+          setName(name);
+          setCategory(category);
+        }}
+        onSeeMore={() => setPickerVisible(true)}
+      />
+
+      <BrandIconPickerModal
+        visible={pickerVisible}
+        onClose={() => setPickerVisible(false)}
+        onSelect={(entry) => {
+          setSelectedPreset(entry.slug);
+          setName(entry.title);
+          setIconSlug(entry.slug);
+          setCategory(entry.category);
+        }}
+      />
+
+      <AmountCurrencyCard
+        amount={amount}
+        onChangeAmount={setAmount}
+        currencyCode={currency}
+        onChangeCurrency={setCurrency}
+        autoPay={autoPay}
+        isTrial={isTrial}
+      />
+
+      <DetailsCard>
+        <DetailsSection>
+          <ServicePlanNameSection
+            name={name}
+            onChangeName={setName}
+            iconSlug={iconSlug}
           />
+        </DetailsSection>
 
-          <BrandIconPickerModal
-            visible={pickerVisible}
-            onClose={() => setPickerVisible(false)}
-            onSelect={(entry) => {
-              setSelectedPreset(entry.slug);
-              setName(entry.title);
-              setIconSlug(entry.slug);
-              setCategory(entry.category);
-            }}
+        <DetailsSection>
+          <BillingFrequencySection
+            value={billingCycle}
+            onChange={setBillingCycle}
           />
+        </DetailsSection>
 
-          <AmountCurrencyCard
-            amount={amount}
-            onChangeAmount={setAmount}
-            currencyCode={currency}
-            onChangeCurrency={setCurrency}
-            autoPay={autoPay}
-            isTrial={isTrial}
+        {billingCycle === "custom" && (
+          <DetailsSection>
+            <Field label="Repeats every (days)">
+              <TextInput
+                style={styles.input}
+                placeholderTextColor={theme.textTertiary}
+                keyboardAppearance={scheme}
+                keyboardType="number-pad"
+                value={customIntervalDays}
+                onChangeText={setCustomIntervalDays}
+              />
+            </Field>
+          </DetailsSection>
+        )}
+
+        <DetailsSection>
+          <NextRenewalDateSection
+            date={nextRenewalDate}
+            onChangeDate={setNextRenewalDate}
           />
+        </DetailsSection>
+        <DetailsSection>
+          <CategorySection value={category} onChange={setCategory} />
+        </DetailsSection>
+      </DetailsCard>
 
-          <DetailsCard>
-            <DetailsSection>
-              <ServicePlanNameSection
-                name={name}
-                onChangeName={setName}
-                iconSlug={iconSlug}
-              />
-            </DetailsSection>
+      <DetailsCard>
+        <DetailsSection>
+          <ToggleRow
+            icon="gift-outline"
+            label="Free trial"
+            subtitle="Mark if this is a trial period"
+            value={isTrial}
+            onValueChange={setIsTrial}
+          />
+        </DetailsSection>
 
-            <DetailsSection>
-              <BillingFrequencySection
-                value={billingCycle}
-                onChange={setBillingCycle}
-              />
-            </DetailsSection>
+        <DetailsSection>
+          <ToggleRow
+            icon="card-outline"
+            label="Auto-pay"
+            subtitle="Auto charged each cycle"
+            value={autoPay}
+            onValueChange={setAutoPay}
+          />
+        </DetailsSection>
+      </DetailsCard>
 
-            {billingCycle === "custom" && (
-              <DetailsSection>
-                <Field label="Repeats every (days)">
-                  <TextInput
-                    style={[styles.input, { color: theme.text }]}
-                    keyboardType="number-pad"
-                    value={customIntervalDays}
-                    onChangeText={setCustomIntervalDays}
-                  />
-                </Field>
-              </DetailsSection>
-            )}
+      <DetailsCard>
+        <DetailsSection last>
+          <NotesSection value={notes} onChangeText={setNotes} />
+        </DetailsSection>
+      </DetailsCard>
 
-            <DetailsSection>
-              <NextRenewalDateSection
-                date={nextRenewalDate}
-                onChangeDate={setNextRenewalDate}
-              />
-            </DetailsSection>
-            <DetailsSection>
-              <CategorySection value={category} onChange={setCategory} />
-            </DetailsSection>
-          </DetailsCard>
+      <Pressable style={styles.saveButton} onPress={handleSave}>
+        <ThemedText type="default" style={styles.saveButtonText}>
+          {isEditing ? "Save changes" : "Add subscription"}
+        </ThemedText>
+      </Pressable>
 
-          <DetailsCard>
-            <DetailsSection>
-              <ToggleRow
-                icon="gift-outline"
-                label="Free trial"
-                subtitle="Mark if this is a trial period"
-                value={isTrial}
-                onValueChange={setIsTrial}
-              />
-            </DetailsSection>
-
-            <DetailsSection>
-              <ToggleRow
-                icon="card-outline"
-                label="Auto-pay"
-                subtitle="Auto charged each cycle"
-                value={autoPay}
-                onValueChange={setAutoPay}
-              />
-            </DetailsSection>
-          </DetailsCard>
-
-          <DetailsCard>
-            <DetailsSection last>
-              <NotesSection value={notes} onChangeText={setNotes} />
-            </DetailsSection>
-          </DetailsCard>
-
-          <Pressable style={styles.saveButton} onPress={handleSave}>
-            <ThemedText type="default" style={styles.saveButtonText}>
-              {isEditing ? "Save changes" : "Add subscription"}
-            </ThemedText>
-          </Pressable>
-
-          {isEditing && (
-            <Pressable style={styles.deleteButton} onPress={handleDelete}>
-              <ThemedText type="default" style={styles.deleteButtonText}>
-                Delete subscription
-              </ThemedText>
-            </Pressable>
-          )}
-        </ScrollView>
-      </ThemedView>
-    </KeyboardAvoidingView>
+      {isEditing && (
+        <Pressable style={styles.deleteButton} onPress={handleDelete}>
+          <ThemedText type="default" style={styles.deleteButtonText}>
+            Delete subscription
+          </ThemedText>
+        </Pressable>
+      )}
+    </ScrollView>
   );
 }
 
@@ -313,6 +310,7 @@ function Field({
   children: React.ReactNode;
   style?: any;
 }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={[styles.field, style]}>
       <ThemedText
@@ -327,100 +325,40 @@ function Field({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FBF9F6",
-  },
-  content: {
-    padding: Spacing.two,
-    gap: Spacing.three,
-    paddingBottom: Spacing.six,
-  },
-  field: { gap: Spacing.one },
-  fieldLabel: { textTransform: "uppercase" },
-  row: { flexDirection: "row", gap: Spacing.three },
-  flex1: { flex: 1 },
-  flex2: { flex: 2 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#8884",
-    borderRadius: Spacing.two,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-    fontSize: 16,
-  },
-  notesInput: { minHeight: 80, textAlignVertical: "top" },
-  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.two },
-  chip: {
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.one,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "#8884",
-  },
-  chipSelected: { backgroundColor: "#4F46E5", borderColor: "#4F46E5" },
-  chipTextSelected: { color: "#ffffff" },
-  switchRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  serviceChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: Spacing.two,
-    paddingVertical: Spacing.one,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "#8884",
-  },
-  serviceChipSelected: {
-    backgroundColor: "#4F46E5",
-    borderColor: "#4F46E5",
-  },
-  serviceChipTextSelected: {
-    color: "#ffffff",
-  },
-  saveButton: {
-    backgroundColor: "#4F46E5",
-    borderRadius: Spacing.three,
-    paddingVertical: Spacing.three,
-    marginHorizontal: Spacing.three,
-    alignItems: "center",
-    marginTop: Spacing.two,
-  },
-  saveButtonText: { color: "#ffffff", fontWeight: "700" },
-  deleteButton: {
-    alignItems: "center",
-    paddingVertical: Spacing.two,
-  },
-  deleteButtonText: { color: "#E5484D" },
-  eyebrow: {
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 0.6,
-    color: "#5B21B6",
-    textTransform: "uppercase",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
-    marginTop: 4,
-    color: "#111827",
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#6B7280",
-    marginTop: 4,
-  },
-  closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F3F4F6",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.background,
+    },
+    content: {
+      padding: Spacing.two,
+      gap: Spacing.three,
+      paddingBottom: Spacing.six,
+    },
+    field: { gap: Spacing.one },
+    fieldLabel: { textTransform: "uppercase" },
+    input: {
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: Spacing.two,
+      paddingHorizontal: Spacing.three,
+      paddingVertical: Spacing.two,
+      fontSize: 16,
+      color: c.text,
+    },
+    saveButton: {
+      backgroundColor: c.accent,
+      borderRadius: Spacing.three,
+      paddingVertical: Spacing.three,
+      marginHorizontal: Spacing.three,
+      alignItems: "center",
+      marginTop: Spacing.two,
+    },
+    saveButtonText: { color: c.onAccent, fontWeight: "700" },
+    deleteButton: {
+      alignItems: "center",
+      paddingVertical: Spacing.two,
+    },
+    deleteButtonText: { color: c.redText },
+  });
