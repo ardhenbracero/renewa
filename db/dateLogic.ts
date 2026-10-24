@@ -1,52 +1,83 @@
+import { parseIsoDate } from "@/utils/date";
 import { BillingCycle, Subscription } from "./schema";
 
+// Adds `months` to a date, clamping to the last day of the target month
+// (Jan 31 + 1 month = Feb 28, not Mar 3)
+function addMonthsClamped(date: Date, months: number): Date {
+  const result = new Date(date.getFullYear(), date.getMonth() + months, 1);
+  const lastDay = new Date(
+    result.getFullYear(),
+    result.getMonth() + 1,
+    0,
+  ).getDate();
+  result.setDate(Math.min(date.getDate(), lastDay));
+  return result;
+}
+
+// Returns the date `times` billing cycles after `date`. Always counts from
+// the same base date so a clamped month doesn't lose the original day
+// (Jan 31 -> Feb 28 -> Mar 31, not Mar 28).
 function addInterval(
   date: Date,
   cycle: BillingCycle,
   customDays: number | null,
+  times = 1,
 ): Date {
   const result = new Date(date);
   switch (cycle) {
     case "weekly":
-      result.setDate(result.getDate() + 7);
+      result.setDate(result.getDate() + 7 * times);
       break;
     case "monthly":
-      result.setMonth(result.getMonth() + 1);
-      break;
+      return addMonthsClamped(date, times);
     case "yearly":
-      result.setFullYear(result.getFullYear() + 1);
-      break;
+      return addMonthsClamped(date, 12 * times);
     case "custom":
-      result.setDate(result.getDate() + (customDays ?? 30));
+      result.setDate(result.getDate() + (customDays ?? 30) * times);
       break;
   }
   return result;
 }
 
+// Stored nextRenewalDate parsed as local midnight (older rows may carry a time)
+function storedRenewalDate(sub: Subscription): Date {
+  return parseIsoDate(sub.nextRenewalDate.slice(0, 10));
+}
+
+// How many cycles past the stored date the upcoming renewal is
+function cyclesUntilUpcoming(sub: Subscription): number {
+  const start = storedRenewalDate(sub);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  let n = 0;
+  while (addInterval(start, sub.billingCycle, sub.customIntervalDays, n) < today) {
+    n++;
+  }
+  return n;
+}
+
 // Given a subscription, returns its next renewal date rolled forward
 // past today, if it's fallen behind (e.g. app wasn't opened for a while)
 export function getUpcomingRenewalDate(sub: Subscription): Date {
-  let next = new Date(sub.nextRenewalDate);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // ← add this line
-
-  while (next < today) {
-    next = addInterval(next, sub.billingCycle, sub.customIntervalDays);
-  }
-
-  return next;
+  return addInterval(
+    storedRenewalDate(sub),
+    sub.billingCycle,
+    sub.customIntervalDays,
+    cyclesUntilUpcoming(sub),
+  );
 }
 
 // The date a subscription moves to when the user taps "Renew":
 // one billing cycle after its current upcoming renewal.
 export function getNextRenewalAfter(sub: Subscription): Date {
   return addInterval(
-    getUpcomingRenewalDate(sub),
+    storedRenewalDate(sub),
     sub.billingCycle,
     sub.customIntervalDays,
+    cyclesUntilUpcoming(sub) + 1,
   );
 }
-
 // Converts a subscription's cost into a monthly-equivalent amount,
 // used for the "Monthly total" figure on the Vault screen
 export function toMonthlyAmount(sub: Subscription): number {
@@ -75,22 +106,20 @@ export function getRenewalOccurrencesInMonth(
   const monthStart = new Date(year, month, 1);
   const monthEnd = new Date(year, month + 1, 1);
 
-  let cursor = new Date(sub.nextRenewalDate);
+  const start = storedRenewalDate(sub);
+  const at = (n: number) =>
+    addInterval(start, sub.billingCycle, sub.customIntervalDays, n);
 
-  // Fast-forward cursor up to the start of the target month.
+  // Fast-forward up to the start of the target month.
   // Capped iteration count as a safety net against bad data.
-  let safety = 0;
-  while (cursor < monthStart && safety < 240) {
-    cursor = addInterval(cursor, sub.billingCycle, sub.customIntervalDays);
-    safety++;
-  }
+  let n = 0;
+  while (at(n) < monthStart && n < 240) n++;
 
-  safety = 0;
-  while (cursor < monthEnd && safety < 60) {
-    if (cursor >= monthStart && cursor < monthEnd) {
-      occurrences.push(new Date(cursor));
-    }
-    cursor = addInterval(cursor, sub.billingCycle, sub.customIntervalDays);
+  let safety = 0;
+  while (at(n) < monthEnd && safety < 60) {
+    const cursor = at(n);
+    if (cursor >= monthStart) occurrences.push(cursor);
+    n++;
     safety++;
   }
 
