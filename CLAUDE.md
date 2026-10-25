@@ -109,7 +109,7 @@ Brand colors: accent `#5B21B6`, gradient `#4338CA` → `#5B21B6` → `#3730A3`, 
 
 ## Data model
 
-`subscriptions` (camelCase columns): name, amount, currency, billingCycle (`weekly | monthly | yearly | custom`), customIntervalDays, category, notes, isTrial, trialConvertsAt, autoPay, startDate, nextRenewalDate, status, iconSlug, createdAt.
+`subscriptions` (camelCase columns): name, amount, currency, billingCycle (`weekly | monthly | yearly | custom`), customIntervalDays, category, notes, isTrial, trialConvertsAt, autoPay, startDate, nextRenewalDate, status, iconSlug, paymentMethod (`debit | credit | cash`, null on rows created before it was added; shown as "Not set"; labels/icons in `constants/payment-methods.ts`), createdAt.
 
 `members` (snake_case columns): id, subscription_id, name, is_manager, paid, created_at. `members.ts` converts rows to the `Member` type with `toMember`.
 

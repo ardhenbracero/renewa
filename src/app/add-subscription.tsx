@@ -17,6 +17,7 @@ import { CategorySection } from "@/components/CategorySection";
 import { DetailsCard, DetailsSection } from "@/components/DetailsCard";
 import { NextRenewalDateSection } from "@/components/NextRenewalDateSection";
 import { NotesSection } from "@/components/NotesSection";
+import { PaymentMethodSection } from "@/components/payment-method-section";
 import { QuickPickSection } from "@/components/QuickPickSection";
 import { ServicePlanNameSection } from "@/components/ServicePlanNameSection";
 import { ThemedText } from "@/components/themed-text";
@@ -28,7 +29,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { toIsoDate } from "@/utils/date";
 import { syncReminders } from "@/utils/notifications";
-import { BillingCycle, NewSubscription } from "@db/schema";
+import { BillingCycle, NewSubscription, PaymentMethod } from "@db/schema";
 import {
   addSubscription,
   deleteSubscription,
@@ -72,10 +73,16 @@ export default function AddSubscriptionScreen() {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
   const [customIntervalDays, setCustomIntervalDays] = useState("30");
   const [nextRenewalDate, setNextRenewalDate] = useState(todayIso());
+  // Set once when the subscription is created; editing keeps the original
+  const [startDate, setStartDate] = useState(todayIso());
   const [isTrial, setIsTrial] = useState(false);
   const [autoPay, setAutoPay] = useState(true);
   const [notes, setNotes] = useState("");
   const [iconSlug, setIconSlug] = useState<string | null>(null);
+  // New subscriptions default to Debit; older ones may have none (null)
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(
+    "debit",
+  );
   const [pickerVisible, setPickerVisible] = useState(false);
 
   useEffect(() => {
@@ -89,10 +96,12 @@ export default function AddSubscriptionScreen() {
         setBillingCycle(existing.billingCycle);
         setCustomIntervalDays(String(existing.customIntervalDays ?? 30));
         setNextRenewalDate(existing.nextRenewalDate.slice(0, 10));
+        setStartDate(existing.startDate);
         setIsTrial(existing.isTrial);
         setAutoPay(existing.autoPay);
         setNotes(existing.notes ?? "");
         setIconSlug(existing.iconSlug ?? null);
+        setPaymentMethod(existing.paymentMethod ?? null);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -130,10 +139,11 @@ export default function AddSubscriptionScreen() {
       isTrial,
       trialConvertsAt: null,
       autoPay,
-      startDate: isEditing ? nextRenewalDate : todayIso(),
+      startDate,
       nextRenewalDate,
       status: "active",
       iconSlug,
+      paymentMethod,
     };
 
     if (isEditing) {
@@ -246,6 +256,15 @@ export default function AddSubscriptionScreen() {
         </DetailsSection>
         <DetailsSection>
           <CategorySection value={category} onChange={setCategory} />
+        </DetailsSection>
+      </DetailsCard>
+
+      <DetailsCard>
+        <DetailsSection last>
+          <PaymentMethodSection
+            value={paymentMethod}
+            onChange={setPaymentMethod}
+          />
         </DetailsSection>
       </DetailsCard>
 

@@ -18,7 +18,7 @@ export function NotesSection({
 
   return (
     <View style={styles.wrapper}>
-      <ThemedText style={styles.labelText}>CANCELLATION NOTES</ThemedText>
+      <ThemedText style={styles.labelText}>NOTES</ThemedText>
 
       <TextInput
         style={styles.input}

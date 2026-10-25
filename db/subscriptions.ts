@@ -14,8 +14,8 @@ function rowToSubscription(row: any): Subscription {
 export function addSubscription(sub: NewSubscription): number {
   const result = db.runSync(
     `INSERT INTO subscriptions
-      (name, amount, currency, billingCycle, customIntervalDays, category, notes, isTrial, trialConvertsAt, autoPay, startDate, nextRenewalDate, status, iconSlug)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (name, amount, currency, billingCycle, customIntervalDays, category, notes, isTrial, trialConvertsAt, autoPay, startDate, nextRenewalDate, status, iconSlug, paymentMethod)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       sub.name,
       sub.amount,
@@ -31,6 +31,7 @@ export function addSubscription(sub: NewSubscription): number {
       sub.nextRenewalDate,
       sub.status,
       sub.iconSlug,
+      sub.paymentMethod,
     ],
   );
   return result.lastInsertRowId;

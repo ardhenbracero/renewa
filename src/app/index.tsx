@@ -16,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
-import { FlatList, Pressable, StyleSheet, View } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function VaultScreen() {
@@ -59,18 +59,6 @@ export default function VaultScreen() {
                     subtitle="Here's what's coming up"
                     style={styles.greeting}
                   />
-
-                  <Pressable
-                    style={styles.settingsButton}
-                    onPress={() => router.push("/settings")}
-                    hitSlop={10}
-                  >
-                    <Ionicons
-                      name="settings-outline"
-                      size={22}
-                      color={theme.textSecondary}
-                    />
-                  </Pressable>
                 </View>
 
                 <LinearGradient

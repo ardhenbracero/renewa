@@ -33,6 +33,7 @@ export function initDatabase() {
   `);
 
   migrateAddIconSlugColumn();
+  migrateAddPaymentMethodColumn();
 }
 
 function migrateAddIconSlugColumn() {
@@ -42,6 +43,16 @@ function migrateAddIconSlugColumn() {
   const hasIconSlug = columns.some((col) => col.name === "iconSlug");
   if (!hasIconSlug) {
     db.execSync("ALTER TABLE subscriptions ADD COLUMN iconSlug TEXT;");
+  }
+}
+
+function migrateAddPaymentMethodColumn() {
+  const columns = db.getAllSync<{ name: string }>(
+    "PRAGMA table_info(subscriptions);",
+  );
+  const hasPaymentMethod = columns.some((col) => col.name === "paymentMethod");
+  if (!hasPaymentMethod) {
+    db.execSync("ALTER TABLE subscriptions ADD COLUMN paymentMethod TEXT;");
   }
 }
 

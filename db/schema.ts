@@ -11,6 +11,8 @@ export type BillingCycle = "weekly" | "monthly" | "yearly" | "custom";
 
 export type SubscriptionStatus = "active" | "cancelled" | "archived";
 
+export type PaymentMethod = "debit" | "credit" | "cash";
+
 export interface Subscription {
   id: number;
   name: string;
@@ -28,6 +30,7 @@ export interface Subscription {
   status: SubscriptionStatus;
   createdAt: string;
   iconSlug: string | null;
+  paymentMethod: PaymentMethod | null; // null for rows created before this field
 }
 
 // Shape used when creating a new subscription (no id/createdAt yet)

@@ -18,6 +18,7 @@ import { syncReminders } from "@/utils/notifications";
 import { getNextRenewalAfter, getUpcomingRenewalDate } from "@db/dateLogic";
 import type { Subscription } from "@db/schema";
 import { getSubscriptionById, updateSubscription } from "@db/subscriptions";
+import { paymentMethodLabel } from "@/constants/payment-methods";
 
 import { AddMemberSheet } from "@/components/subscription-details/add-member-sheet";
 import { FamilySharingSection } from "@/components/subscription-details/family-sharing-section";
@@ -142,6 +143,12 @@ export default function SubscriptionDetailsScreen() {
               <FadeUpGroup step={100}>
                 <DetailsSection>
                   <InfoRow
+                    label="STARTED"
+                    value={formatDate(parseIsoDate(sub.startDate.slice(0, 10)))}
+                  />
+                </DetailsSection>
+                <DetailsSection>
+                  <InfoRow
                     label="NEXT RENEWAL"
                     value={formatDate(getUpcomingRenewalDate(sub), true)}
                   />
@@ -150,13 +157,13 @@ export default function SubscriptionDetailsScreen() {
                   <InfoRow label="BILLING CYCLE" value={cycleLabel(sub)} />
                 </DetailsSection>
                 <DetailsSection>
-                  <InfoRow label="CATEGORY" value={sub.category} />
+                  <InfoRow
+                    label="PAID FROM"
+                    value={paymentMethodLabel(sub.paymentMethod)}
+                  />
                 </DetailsSection>
                 <DetailsSection last>
-                  <InfoRow
-                    label="STARTED"
-                    value={formatDate(parseIsoDate(sub.startDate.slice(0, 10)))}
-                  />
+                  <InfoRow label="CATEGORY" value={sub.category} />
                 </DetailsSection>
               </FadeUpGroup>
             </DetailsCard>
