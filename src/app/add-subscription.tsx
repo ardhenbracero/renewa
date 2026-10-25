@@ -12,13 +12,13 @@ import {
 import { AddSubscriptionHeader } from "@/components/AddSubscriptionHeader";
 import { AmountCurrencyCard } from "@/components/AmountCurrencyCard";
 import { BillingFrequencySection } from "@/components/BillingFrequencySection";
-import { BrandIconPickerModal } from "@/components/BrandIconPickerModal";
 import { CategorySection } from "@/components/CategorySection";
 import { DetailsCard, DetailsSection } from "@/components/DetailsCard";
 import { NextRenewalDateSection } from "@/components/NextRenewalDateSection";
 import { NotesSection } from "@/components/NotesSection";
 import { PaymentMethodSection } from "@/components/payment-method-section";
 import { QuickPickSection } from "@/components/QuickPickSection";
+import { ServicePickerModal } from "@/components/service-picker-modal";
 import { ServicePlanNameSection } from "@/components/ServicePlanNameSection";
 import { ThemedText } from "@/components/themed-text";
 import { ToggleRow } from "@/components/ToggleRow";
@@ -64,7 +64,6 @@ export default function AddSubscriptionScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditing = !!id;
-  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
@@ -187,9 +186,8 @@ export default function AddSubscriptionScreen() {
       />
 
       <QuickPickSection
-        selectedSlug={selectedPreset}
+        selectedSlug={iconSlug}
         onSelect={(slug, name, category) => {
-          setSelectedPreset(slug);
           setIconSlug(slug);
           setName(name);
           setCategory(category);
@@ -197,14 +195,14 @@ export default function AddSubscriptionScreen() {
         onSeeMore={() => setPickerVisible(true)}
       />
 
-      <BrandIconPickerModal
+      <ServicePickerModal
         visible={pickerVisible}
+        selectedSlug={iconSlug}
         onClose={() => setPickerVisible(false)}
-        onSelect={(entry) => {
-          setSelectedPreset(entry.slug);
-          setName(entry.title);
-          setIconSlug(entry.slug);
-          setCategory(entry.category);
+        onSelect={(picked) => {
+          setIconSlug(picked.iconSlug);
+          setName(picked.name);
+          setCategory(picked.category);
         }}
       />
 

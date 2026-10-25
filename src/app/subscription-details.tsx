@@ -2,8 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { useReducedMotion } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { Confetti, type ConfettiOrigin } from "@/components/confetti";
 import { DetailsCard, DetailsSection } from "@/components/DetailsCard";
 import { FadeUpGroup } from "@/components/fade-up";
 import { DetailsHero } from "@/components/subscription-details/details-hero";
@@ -59,6 +61,12 @@ export default function SubscriptionDetailsScreen() {
 
   const [sub, setSub] = useState<Subscription | null>(null);
   const [renewed, setRenewed] = useState(false);
+  // Each Renew gets a new key so the confetti burst restarts
+  const [burst, setBurst] = useState<{
+    key: number;
+    origin: ConfettiOrigin;
+  } | null>(null);
+  const reduceMotion = useReducedMotion();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(() => {
@@ -72,7 +80,7 @@ export default function SubscriptionDetailsScreen() {
     [],
   );
 
-  function handleRenew() {
+  function handleRenew(origin: ConfettiOrigin) {
     if (!sub || renewed) return;
     const next = getNextRenewalAfter(sub);
     updateSubscription(sub.id, { nextRenewalDate: toIsoDate(next) });
@@ -80,6 +88,7 @@ export default function SubscriptionDetailsScreen() {
     resetPaid();
     load();
     setRenewed(true);
+    if (!reduceMotion) setBurst({ key: Date.now(), origin });
     timer.current = setTimeout(() => setRenewed(false), 1800);
   }
 
@@ -201,6 +210,15 @@ export default function SubscriptionDetailsScreen() {
           </ScrollView>
         )}
       </SafeAreaView>
+
+      {/* Full-screen layer so falling pieces draw over the cards below */}
+      {burst && (
+        <Confetti
+          key={burst.key}
+          origin={burst.origin}
+          onDone={() => setBurst(null)}
+        />
+      )}
     </ThemedView>
   );
 }

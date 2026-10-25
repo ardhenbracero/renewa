@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRef, type ComponentRef } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
+import type { ConfettiOrigin } from "@/components/confetti";
 import { ThemedText } from "@/components/themed-text";
 import type { ThemeColors } from "@/constants/palette";
 import { useTheme } from "@/hooks/use-theme";
@@ -17,16 +19,25 @@ export function RenewButton({
 }: {
   nextDateLabel: string;
   renewed: boolean;
-  onPress: () => void;
+  // Receives the button's center on screen, used as the confetti origin
+  onPress: (origin: ConfettiOrigin) => void;
 }) {
   const styles = useThemedStyles(makeStyles);
   const theme = useTheme();
+  const buttonRef = useRef<ComponentRef<typeof View>>(null);
+
+  function handlePress() {
+    buttonRef.current?.measureInWindow((x, y, width, height) =>
+      onPress({ x: x + width / 2, y: y + height / 2 }),
+    );
+  }
 
   return (
     <View style={styles.wrapper}>
       <Pressable
+        ref={buttonRef}
         style={[styles.button, renewed && styles.buttonSuccess]}
-        onPress={onPress}
+        onPress={handlePress}
         disabled={renewed}
       >
         <Ionicons

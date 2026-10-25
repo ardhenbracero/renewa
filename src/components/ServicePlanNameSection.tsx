@@ -1,5 +1,4 @@
-import { BrandIcon, getBrandHex, hasBrandIcon } from "@/components/brand-icon";
-import { InitialsAvatar } from "@/components/InitialsAvatar";
+import { ServiceIcon } from "@/components/service-icon";
 import { ThemedText } from "@/components/themed-text";
 import type { ThemeColors } from "@/constants/palette";
 import { useAppTheme } from "@/context/theme-context";
@@ -19,8 +18,6 @@ export function ServicePlanNameSection({
   const styles = useThemedStyles(makeStyles);
   const theme = useTheme();
   const { scheme } = useAppTheme();
-  const showBrandIcon = iconSlug && hasBrandIcon(iconSlug);
-  const badgeColor = iconSlug ? getBrandHex(iconSlug) : null;
 
   return (
     <View style={styles.row}>
@@ -29,15 +26,7 @@ export function ServicePlanNameSection({
       </View>
 
       <View style={styles.inputRow}>
-        <View
-          style={[styles.badge, { backgroundColor: badgeColor ?? theme.border }]}
-        >
-          {showBrandIcon ? (
-            <BrandIcon slug={iconSlug!} size={18} color="white" />
-          ) : (
-            <InitialsAvatar name={name || "?"} size={32} />
-          )}
-        </View>
+        <ServiceIcon name={name || "?"} iconSlug={iconSlug} size={36} />
 
         <TextInput
           style={styles.input}
@@ -72,13 +61,6 @@ const makeStyles = (c: ThemeColors) =>
       paddingVertical: 5,
       paddingHorizontal: 15,
       borderRadius: 12,
-    },
-    badge: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      justifyContent: "center",
-      alignItems: "center",
     },
     input: {
       flex: 1,

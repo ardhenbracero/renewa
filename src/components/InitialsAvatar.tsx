@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 
-const PALETTE = [
+// Tile colors for initials, also offered as custom-service colors in the picker
+export const AVATAR_COLORS = [
   "#EF4444",
   "#F97316",
   "#F59E0B",
@@ -18,15 +19,17 @@ export function colorForName(name: string): string {
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return PALETTE[Math.abs(hash) % PALETTE.length];
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
 export function InitialsAvatar({
   name,
   size = 32,
+  color,
 }: {
   name: string;
   size?: number;
+  color?: string; // overrides the name-based color (custom services)
 }) {
   const initials = name
     .trim()
@@ -43,7 +46,7 @@ export function InitialsAvatar({
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: colorForName(name),
+          backgroundColor: color ?? colorForName(name),
         },
       ]}
     >

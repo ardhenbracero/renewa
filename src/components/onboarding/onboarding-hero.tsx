@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, View } from "react-native";
 
-import { BrandIcon, getBrandHex } from "@/components/brand-icon";
+import { ServiceIcon } from "@/components/service-icon";
 import { ThemedText } from "@/components/themed-text";
 import { useEffect } from "react";
 import Animated, {
@@ -128,21 +128,7 @@ function Spin({
 const ACCENT = "#4338CA";
 
 function Badge({ slug, size = 36 }: { slug: string; size?: number }) {
-  return (
-    <View
-      style={[
-        styles.badge,
-        {
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor: getBrandHex(slug) ?? "#111827",
-        },
-      ]}
-    >
-      <BrandIcon slug={slug} size={size * 0.52} color="white" />
-    </View>
-  );
+  return <ServiceIcon name={slug} iconSlug={slug} size={size} />;
 }
 
 export function OnboardingHero() {
@@ -197,7 +183,7 @@ export function OnboardingHero() {
         rotate="-8deg"
         style={[styles.floatCard, styles.youtube]}
       >
-        <BrandIcon slug="youtube" size={30} />
+        <Badge slug="youtube" size={30} />
       </Pop>
 
       {/* Spotify 20 */}
@@ -223,7 +209,7 @@ export function OnboardingHero() {
         rotate="3deg"
         style={[styles.floatCard, styles.chatgpt]}
       >
-        <Badge slug="openai" size={26} />
+        <Badge slug="chatgpt" size={26} />
         <ThemedText style={styles.cardName}>₱1,200/month</ThemedText>
       </Pop>
 
@@ -276,7 +262,6 @@ export function OnboardingHero() {
 
 const styles = StyleSheet.create({
   hero: { height: 340, borderRadius: 32, overflow: "hidden" },
-  badge: { justifyContent: "center", alignItems: "center" },
 
   topRow: {
     position: "absolute",

@@ -1,11 +1,21 @@
-import { BrandIcon, getBrandHex } from "@/components/brand-icon";
+import { ServiceLogo } from "@/components/service-icon";
 import { ThemedText } from "@/components/themed-text";
 import type { ThemeColors } from "@/constants/palette";
-import { SERVICE_PRESETS } from "@/constants/service-presets";
+import { getService, SERVICE_CATALOG } from "@/constants/service-catalog";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
-const QUICK_PICK_LIMIT = 6;
+// Catalog ids shown as Quick pick, in order
+const QUICK_PICK_IDS = [
+  "netflix",
+  "youtube",
+  "spotify",
+  "disneyplus",
+  "canva",
+  "chatgpt",
+  "icloud",
+  "primevideo",
+];
 
 export function QuickPickSection({
   selectedSlug,
@@ -17,14 +27,17 @@ export function QuickPickSection({
   onSeeMore: () => void;
 }) {
   const styles = useThemedStyles(makeStyles);
-  const presets = SERVICE_PRESETS.slice(0, QUICK_PICK_LIMIT);
+  const presets = QUICK_PICK_IDS.map((id) => getService(id)!);
+  const selectedId = getService(selectedSlug)?.id;
 
   return (
     <View style={styles.section}>
       <View style={styles.labelRow}>
         <ThemedText style={styles.sectionLabel}>POPULAR SERVICES</ThemedText>
         <Pressable onPress={onSeeMore}>
-          <ThemedText style={styles.seeMore}>See all 40+</ThemedText>
+          <ThemedText style={styles.seeMore}>
+            See all {SERVICE_CATALOG.length}
+          </ThemedText>
         </Pressable>
       </View>
 
@@ -34,21 +47,16 @@ export function QuickPickSection({
         contentContainerStyle={styles.chipRow}
       >
         {presets.map((preset) => {
-          const selected = selectedSlug === preset.slug;
-          const badgeColor = getBrandHex(preset.slug) ?? "#111827";
+          const selected = selectedId === preset.id;
 
           return (
             <Pressable
-              key={preset.slug}
+              key={preset.id}
               style={styles.chip}
-              onPress={() =>
-                onSelect(preset.slug, preset.name, preset.category)
-              }
+              onPress={() => onSelect(preset.id, preset.name, preset.category)}
             >
               <View style={[styles.ring, selected && styles.ringSelected]}>
-                <View style={[styles.badge, { backgroundColor: badgeColor }]}>
-                  <BrandIcon slug={preset.slug} size={26} color="white" />
-                </View>
+                <ServiceLogo service={preset} size={54} />
               </View>
               <ThemedText
                 style={[styles.chipLabel, selected && styles.chipLabelSelected]}
@@ -105,13 +113,6 @@ const makeStyles = (c: ThemeColors) =>
     },
     ringSelected: {
       borderColor: c.accent,
-    },
-    badge: {
-      width: 54,
-      height: 54,
-      borderRadius: 27,
-      justifyContent: "center",
-      alignItems: "center",
     },
     chipLabel: {
       fontSize: 12,

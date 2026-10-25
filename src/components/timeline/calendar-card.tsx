@@ -1,8 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { getBrandHex } from "@/components/brand-icon";
-import { colorForName } from "@/components/InitialsAvatar";
+import { serviceColor } from "@/components/service-icon";
 import { ThemedText } from "@/components/themed-text";
 import type { ThemeColors } from "@/constants/palette";
 import { useTheme } from "@/hooks/use-theme";
@@ -23,11 +22,10 @@ function sameDay(a: Date, b: Date) {
   );
 }
 
-// Brand color when we have one (Netflix red, Spotify green), else the name-based color
+// Brand color for catalog services, the chosen color for custom ones,
+// else the name-based color
 function dotColor(sub: Subscription) {
-  return (
-    (sub.iconSlug ? getBrandHex(sub.iconSlug) : null) ?? colorForName(sub.name)
-  );
+  return serviceColor(sub.name, sub.iconSlug);
 }
 
 export function CalendarCard({

@@ -8,7 +8,7 @@ Local-only subscription tracker for iOS (App Store target). Users add the subscr
 - Data: `expo-sqlite` using the **synchronous API** (`getAllSync`, `runSync`, `execSync`). Not Drizzle, not async.
 - Small settings (profile name, onboarded flag, theme preference): `@react-native-async-storage/async-storage`
 - Animation: `react-native-reanimated`. Graphics: `react-native-svg`, `expo-linear-gradient`
-- Icons: `@expo/vector-icons` (Ionicons) for UI icons, `simple-icons` for brand logos
+- Icons: `@expo/vector-icons` (Ionicons) for UI icons, brand logos from the generated `constants/service-catalog.ts` (see Icons)
 - Developed in VS Code (no Xcode), tested on a physical iPhone through **Expo Go**. The phone has no console access, so debug by rendering values on screen temporarily.
 
 ## Commands
@@ -39,7 +39,7 @@ src/
   components/                  shared components (screen-header.tsx = shared page title)
     subscription-details/  onboarding/  timeline/  insights/  settings/
   constants/                   palette.ts, theme.ts, currencies.ts, categories.ts,
-                               service-presets.ts, subscription-relevant-icons.ts, all-brand-icons.ts
+                               service-catalog.ts (generated), payment-methods.ts
   context/                     profile-context.tsx, theme-context.tsx
   hooks/                       use-subscriptions, use-members, use-theme, use-themed-styles
   utils/                       date.ts, format.ts, split.ts, insights.ts, initials.ts, notifications.ts
@@ -135,10 +135,12 @@ Database rules:
 
 ## Icons
 
-- `BrandIcon` resolves a simple-icons export as `si` + slug with only the first letter capitalized (`applemusic` -> `siApplemusic`). Slugs are lowercase and must match the library's `.slug`.
-- `ServiceIcon` renders the brand logo, or falls back to `InitialsAvatar` (colored circle + initials) when `iconSlug` is empty or unknown. Always use `ServiceIcon` for subscription icons, never `BrandIcon` directly.
-- `colorForName` is exported from `InitialsAvatar.tsx` and gives a stable color per name.
-- Quick pick shows the first 6 of `SERVICE_PRESETS`; "See all" opens a searchable picker over the curated list (`CURATED_BRAND_ICONS`), with a fallback search of every icon. Curated entries in `subscription-relevant-icons.ts` carry a `category`, which must be one of the names in `constants/categories.ts` (includes "Other").
+- Brand logos come from `constants/service-catalog.ts`, a **generated** list of ~65 subscription services (id, name, category, brand color, logo). Do not edit it by hand: change `SERVICES` in `scripts/build-service-catalog.js` and re-run it (instructions at the top of the script). The app does not import `simple-icons` at runtime; the script copies only the logo shapes it needs (simple-icons and Iconify "logos", both CC0).
+- Three logo kinds: `glyph` (one-color path drawn white on the brand color), `svg` (full-color logo on a white tile, for brands simple-icons dropped such as Microsoft, Adobe, OpenAI), and `text` (lettered tile for brands with no free logo, e.g. Disney+ "D+", Canva "C"). No free icon library has Disney+, Canva, Prime Video, Hulu or Xbox; their owners have them removed.
+- A subscription's `iconSlug` is a catalog `id` (lowercase, never rename a shipped id; `getService` also accepts old aliases like `openai`), or `custom:#RRGGBB` for a custom service (initials on the chosen color), or null.
+- Always render subscription icons with `ServiceIcon` (`components/service-icon.tsx`). Use `ServiceLogo` only when you already hold a catalog entry (pickers). `serviceColor(name, iconSlug)` gives the color for calendar dots and legends.
+- Quick pick shows `QUICK_PICK_IDS` in `QuickPickSection.tsx`; "See all" opens `ServicePickerModal` (search, catalog grouped by category, and "Custom service": name + color). Catalog categories must be names from `constants/categories.ts`.
+- `colorForName` and `AVATAR_COLORS` are exported from `InitialsAvatar.tsx`; `InitialsAvatar` takes an optional `color`.
 - UI icons: Ionicons. Type icon names as `ComponentProps<typeof Ionicons>["name"]`.
 
 ## React Native gotchas learned here
@@ -183,7 +185,7 @@ Database rules:
 ## Release checklist (App Store)
 
 1. `app.json`: name ("Renewa"), splash colors and `userInterfaceStyle: "automatic"` are done. **Still needed:** a permanent `ios.bundleIdentifier` (e.g. `com.yourname.renewa`), chosen once the Apple Developer account exists.
-2. App icon (1024x1024 PNG) and splash image. `assets/images/icon.png`, `splash-icon.png` and `assets/expo.icon` are still Expo template art.
+2. App icon and splash: done. `assets/images/icon.png` (1024, opaque), `icon-dark.png` / `icon-tinted.png` (1024, white symbol on transparent), `splash-icon.png` (600, violet symbol on transparent), wired in `app.json` (`ios.icon` light/dark/tinted). Only visible in a real build, not Expo Go. Android/web icons are still template art (iOS-only app).
 3. Apple Developer account ($99/year).
 4. `npx eas-cli login`, `eas build:configure`, then `eas build --platform ios` (preview profile first, production after).
 5. `eas submit --platform ios`, then test through TestFlight on a real device.
