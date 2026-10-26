@@ -11,7 +11,7 @@ import type { OutlookMonth } from "@/utils/insights";
 const BAR_AREA = 96;
 
 function compact(value: number) {
-  return formatCurrency(Math.round(value)).replace(/\.00$/, "");
+  return formatCurrency(Math.round(value));
 }
 
 function monthYear(date: Date) {

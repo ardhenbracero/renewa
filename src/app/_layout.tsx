@@ -1,4 +1,5 @@
 import { BottomTabBar } from "@/components/bottom-tab-bar";
+import { LogoIntro } from "@/components/logo-intro";
 import { ThemeProvider, useAppTheme } from "@/context/theme-context";
 import { useTheme } from "@/hooks/use-theme";
 import { Stack } from "expo-router";
@@ -18,6 +19,8 @@ function RootNavigator() {
   const { loaded: themeLoaded, scheme } = useAppTheme();
   const theme = useTheme();
   const [dbReady, setDbReady] = useState(false);
+  // Launch animation plays once per app start, over whatever screen loads
+  const [showIntro, setShowIntro] = useState(true);
 
   useEffect(() => {
     initDatabase();
@@ -45,7 +48,7 @@ function RootNavigator() {
 
   return (
     <>
-      <StatusBar style={scheme === "dark" ? "light" : "dark"} />
+      <StatusBar style={showIntro || scheme === "dark" ? "light" : "dark"} />
       <Stack
         screenOptions={{
           headerShown: false,
@@ -79,6 +82,8 @@ function RootNavigator() {
 
       {/* One floating tab bar above all screens; hides itself off the tabs */}
       {onboarded && <BottomTabBar />}
+
+      {showIntro && <LogoIntro onDone={() => setShowIntro(false)} />}
     </>
   );
 }

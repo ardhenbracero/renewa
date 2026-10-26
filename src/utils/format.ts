@@ -2,15 +2,19 @@ export function formatCurrency(
   amount: number,
   currency: string = "PHP",
 ): string {
+  // Whole amounts drop ".00" (₱549); real cents stay (₱149.50). Round to the
+  // cent first so computed values like 549.0000001 still count as whole.
+  const cents = Math.round(amount * 100);
+  const digits = cents % 100 === 0 ? 0 : 2;
   try {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    }).format(cents / 100);
   } catch {
-    return `$${amount.toFixed(2)}`;
+    return `$${(cents / 100).toFixed(digits)}`;
   }
 }
 

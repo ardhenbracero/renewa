@@ -185,7 +185,7 @@ Database rules:
 ## Release checklist (App Store)
 
 1. `app.json`: name ("Renewa"), splash colors and `userInterfaceStyle: "automatic"` are done. **Still needed:** a permanent `ios.bundleIdentifier` (e.g. `com.yourname.renewa`), chosen once the Apple Developer account exists.
-2. App icon and splash: done. `assets/images/icon.png` (1024, opaque), `icon-dark.png` / `icon-tinted.png` (1024, white symbol on transparent), `splash-icon.png` (600, violet symbol on transparent), wired in `app.json` (`ios.icon` light/dark/tinted). Only visible in a real build, not Expo Go. Android/web icons are still template art (iOS-only app).
+2. App icon and splash: done. `assets/images/icon.png` (1024, opaque), `icon-dark.png` / `icon-tinted.png` (1024, white symbol on transparent), wired in `app.json` (`ios.icon` light/dark/tinted). The native splash is plain violet `#5B21B6` with no image on purpose: it flows into `components/logo-intro.tsx`, the ~3s draw-on launch animation played from `_layout.tsx` (`splash-icon.png` is kept but unused). Only visible in a real build, not Expo Go. Android/web icons are still template art (iOS-only app).
 3. Apple Developer account ($99/year).
 4. `npx eas-cli login`, `eas build:configure`, then `eas build --platform ios` (preview profile first, production after).
 5. `eas submit --platform ios`, then test through TestFlight on a real device.
