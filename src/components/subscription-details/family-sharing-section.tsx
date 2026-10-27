@@ -41,6 +41,7 @@ export function FamilySharingSection({
   currency,
   members,
   onAddPress,
+  locked = false,
   onTogglePaid,
   onRemove,
   onReset,
@@ -49,6 +50,7 @@ export function FamilySharingSection({
   currency: string;
   members: Member[];
   onAddPress: () => void;
+  locked?: boolean; // Family Sharing needs Pro
   onTogglePaid: (member: Member) => void;
   onRemove: (id: number) => void;
   onReset: () => void;
@@ -82,7 +84,9 @@ export function FamilySharingSection({
         <ThemedText style={styles.label}>FAMILY SHARING</ThemedText>
         {members.length > 0 && (
           <Pressable onPress={onAddPress} hitSlop={8}>
-            <ThemedText style={styles.addLink}>+ Add member</ThemedText>
+            <ThemedText style={styles.addLink}>
+              {locked ? "+ Add member (Pro)" : "+ Add member"}
+            </ThemedText>
           </Pressable>
         )}
       </View>
@@ -98,6 +102,11 @@ export function FamilySharingSection({
           <Pressable style={styles.emptyButton} onPress={onAddPress}>
             <Ionicons name="person-add-outline" size={16} color={theme.accentText} />
             <ThemedText style={styles.emptyButtonText}>Add member</ThemedText>
+            {locked && (
+              <View style={styles.proTag}>
+                <ThemedText style={styles.proTagText}>PRO</ThemedText>
+              </View>
+            )}
           </Pressable>
         </View>
       ) : (
@@ -218,6 +227,13 @@ const makeStyles = (c: ThemeColors) =>
       paddingVertical: 9,
       borderRadius: 18,
     },
+    proTag: {
+      backgroundColor: c.accent,
+      borderRadius: 6,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+    },
+    proTagText: { fontSize: 10, fontWeight: "800", color: c.onAccent },
     emptyButtonText: {
       fontSize: 15,
       fontWeight: "700",

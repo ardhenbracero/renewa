@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -6,7 +7,9 @@ import { TAB_BAR_SPACE } from "@/components/bottom-tab-bar";
 import { FadeUpGroup } from "@/components/fade-up";
 import { AppearanceCard } from "@/components/settings/appearance-card";
 import { EditNameSheet } from "@/components/settings/edit-name-sheet";
+import { FamilyPromoCard } from "@/components/settings/family-promo-card";
 import { NotificationsCard } from "@/components/settings/notifications-card";
+import { PlanCard } from "@/components/settings/plan-card";
 import { ProfileCard } from "@/components/settings/profile-card";
 import { ScreenHeader } from "@/components/screen-header";
 import { ThemedText } from "@/components/themed-text";
@@ -19,7 +22,12 @@ import { useThemedStyles } from "@/hooks/use-themed-styles";
 export default function SettingsScreen() {
   const styles = useThemedStyles(makeStyles);
   const { name, updateName } = useProfile();
-  const { subscriptions } = useSubscriptions();
+  const { subscriptions, refresh } = useSubscriptions();
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh]),
+  );
   const [editVisible, setEditVisible] = useState(false);
 
   return (
@@ -40,6 +48,10 @@ export default function SettingsScreen() {
               subscriptionCount={subscriptions.length}
               onEditPress={() => setEditVisible(true)}
             />
+
+            <PlanCard activeCount={subscriptions.length} />
+
+            <FamilyPromoCard />
 
             <AppearanceCard />
 

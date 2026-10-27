@@ -24,6 +24,7 @@ import { ThemedText } from "@/components/themed-text";
 import { ToggleRow } from "@/components/ToggleRow";
 import type { ThemeColors } from "@/constants/palette";
 import { Spacing } from "@/constants/theme";
+import { usePro } from "@/context/pro-context";
 import { useAppTheme } from "@/context/theme-context";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
@@ -62,6 +63,7 @@ export default function AddSubscriptionScreen() {
   const theme = useTheme();
   const { scheme } = useAppTheme();
   const router = useRouter();
+  const { canAddSubscription } = usePro();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditing = !!id;
 
@@ -110,6 +112,12 @@ export default function AddSubscriptionScreen() {
     const trimmedName = name.trim();
     const parsedAmount = parseFloat(amount);
 
+    // Free plan limit (editing existing subscriptions is always allowed).
+    // The Pro screen opens on top, so the form is still here after unlocking.
+    if (!isEditing && !canAddSubscription()) {
+      router.push("/pro?reason=limit");
+      return;
+    }
     if (!trimmedName) {
       Alert.alert("Name required", "Give this subscription a name.");
       return;

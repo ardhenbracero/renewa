@@ -8,6 +8,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { AppState } from "react-native";
 
+import { ProProvider } from "@/context/pro-context";
 import { ProfileProvider, useProfile } from "@/context/profile-context";
 import { syncReminders } from "@/utils/notifications";
 import { initDatabase } from "@db/database";
@@ -77,6 +78,7 @@ function RootNavigator() {
             }}
           />
           <Stack.Screen name="subscription-details" />
+          <Stack.Screen name="pro" options={{ presentation: "modal" }} />
         </Stack.Protected>
       </Stack>
 
@@ -92,7 +94,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <ProfileProvider>
-        <RootNavigator />
+        <ProProvider>
+          <RootNavigator />
+        </ProProvider>
       </ProfileProvider>
     </ThemeProvider>
   );

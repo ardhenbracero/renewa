@@ -24,6 +24,7 @@ import { paymentMethodLabel } from "@/constants/payment-methods";
 
 import { AddMemberSheet } from "@/components/subscription-details/add-member-sheet";
 import { FamilySharingSection } from "@/components/subscription-details/family-sharing-section";
+import { usePro } from "@/context/pro-context";
 import { useProfile } from "@/context/profile-context";
 import { useMembers } from "@/hooks/use-members";
 
@@ -56,6 +57,7 @@ export default function SubscriptionDetailsScreen() {
   const styles = useThemedStyles(makeStyles);
   const theme = useTheme();
   const router = useRouter();
+  const { isPro } = usePro();
   const { id } = useLocalSearchParams<{ id: string }>();
   const subId = Number(id);
 
@@ -188,7 +190,10 @@ export default function SubscriptionDetailsScreen() {
                 total={sub.amount}
                 currency={sub.currency}
                 members={members}
-                onAddPress={() => setSheetVisible(true)}
+                locked={!isPro}
+                onAddPress={() =>
+                  isPro ? setSheetVisible(true) : router.push("/pro?reason=family")
+                }
                 onTogglePaid={togglePaid}
                 onRemove={removeMember}
                 onReset={resetPaid}

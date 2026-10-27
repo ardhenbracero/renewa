@@ -23,6 +23,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { ThemeColors } from "@/constants/palette";
+import { usePro } from "@/context/pro-context";
 import { useAppTheme } from "@/context/theme-context";
 import { useTheme } from "@/hooks/use-theme";
 import { useThemedStyles } from "@/hooks/use-themed-styles";
@@ -102,6 +103,7 @@ export function BottomTabBar() {
   const router = useRouter();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
+  const { canAddSubscription } = usePro();
 
   const activeIndex = TABS.findIndex((t) => t.href === pathname);
   const [slotWidth, setSlotWidth] = useState(0);
@@ -167,7 +169,11 @@ export function BottomTabBar() {
       </GlassSurface>
 
       <Pressable
-        onPress={() => router.push("/add-subscription")}
+        onPress={() =>
+          router.push(
+            canAddSubscription() ? "/add-subscription" : "/pro?reason=limit",
+          )
+        }
         accessibilityRole="button"
         accessibilityLabel="Add subscription"
       >
